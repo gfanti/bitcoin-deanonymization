@@ -28,7 +28,7 @@ def _bytes_feature(value):
 	return tf.train.Feature(bytes_list=tf.train.BytesList(value=[value]))
 
 
-def create_dataset(G, theta, trials, name, train = True, run = 1):
+def create_dataset(G, theta, trials, name, run = 1):
 	''' Creates a dataset by spreading over graph G. 
 	Inputs:
 		G 		graph object
