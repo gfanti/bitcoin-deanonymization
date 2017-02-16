@@ -102,7 +102,7 @@ if __name__ == '__main__':
 	# print 'Creating validation data'
 	# create_dataset(G, theta, validation_trials, 'validation')
 	print 'Creating test data'
-	create_dataset(G, theta, test_trials, 'test', run = run)
+	create_dataset(G, theta, test_trials, 'test', train = False, run = run)
 
 		
 
