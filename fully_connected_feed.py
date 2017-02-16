@@ -32,6 +32,7 @@ import network_setup
 
 # Basic model parameters as external flags.
 FLAGS = None
+# RUNS = [1,2,3,4]
 RUNS = [1]
 
 

@@ -22,6 +22,7 @@ from __future__ import print_function
 import os
 
 import numpy as np
+import network_setup
 from six.moves import xrange  # pylint: disable=redefined-builtin
 
 from tensorflow.contrib.learn.python.learn.datasets import base
@@ -136,6 +137,21 @@ class DataSet(object):
     # return self._features[start:end], self._labels[start:end]
 
 
+def remove_incompletes(features, labels):
+  to_remove = []
+  for i in range(len(features)):
+    if len(features[i]) != network_setup.NUM_CLASSES:
+      to_remove.append(i)
+  if len(to_remove) > 0:
+    print ('Before:: Features ', len(features), ' Labels: ', len(labels))
+    features = np.squeeze(np.vstack(np.delete(features, to_remove, 0)))
+    labels = np.squeeze(np.vstack(np.delete(labels, to_remove, 0)))
+    # print ('max', max([len(k) for k in features]))
+    # print ('min', min([len(k) for k in features]))
+    print ('After:: Features: ', np.asmatrix(features).shape, ' Labels: ', np.asmatrix(labels).shape)
+  return features, labels
+
+
 def read_data_sets(train_dir,
                    one_hot=False,
                    dtype=dtypes.float32,
@@ -171,6 +187,7 @@ def read_data_sets(train_dir,
         train_labels = np.concatenate((train_labels, extract_labels(f, one_hot=one_hot)))
 
 
+
     # Testing
     local_file = os.path.join(train_dir, run_prefix + TEST_FEATURES)
     with open(local_file, 'rb') as f:
@@ -186,6 +203,11 @@ def read_data_sets(train_dir,
         test_labels = extract_labels(f, one_hot=one_hot)
       else:
         test_labels = np.concatenate((test_labels, extract_labels(f, one_hot=one_hot)))
+
+
+  # Remove features that are not well-formed (ie not all timestamps are collected)  
+  train_features, train_labels = remove_incompletes(train_features, train_labels)
+  test_features, test_labels = remove_incompletes(test_features, test_labels)
 
   # # We'll use the first 200k items to avoid using too much memory and train faster
   # train_features = train_features[:200000]

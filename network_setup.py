@@ -33,6 +33,10 @@ import tensorflow as tf
 
 # The Random regular graph dataset has 100 classes, representing the 100 candidate sources
 NUM_CLASSES = 100
+# # The 5-regular tree graph dataset has 341 classes
+# NUM_CLASSES = 341
+# # The 4-regular tree graph dataset has 364 classes
+# NUM_CLASSES = 364
 
 # The MNIST images are always 28x28 pixels.
 FEATURE_SIZE = NUM_CLASSES
