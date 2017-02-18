@@ -28,7 +28,7 @@ def _bytes_feature(value):
 	return tf.train.Feature(bytes_list=tf.train.BytesList(value=[value]))
 
 
-def create_dataset(G, theta, trials, name, run = 1):
+def create_dataset(G, theta, trials, name, run = 1, regular_degree = None):
 	''' Creates a dataset by spreading over graph G. 
 	Inputs:
 		G 		graph object
@@ -37,6 +37,7 @@ def create_dataset(G, theta, trials, name, run = 1):
 		train 	is this a training dataset (True) or test dataset (False)?
 		run 	the index of the dataset. Only used if dataset is too large 
 					to fit in memory
+		regular_degree 	the degree of the tree, if graph is a regular tree
 	'''
 
 	run_prefix = 'run' + str(run) + '_' 
@@ -52,10 +53,12 @@ def create_dataset(G, theta, trials, name, run = 1):
 
 	num_nodes = nx.number_of_nodes(G)
 	for trial in tqdm(range(trials)):
-		if train:
-			source = G.nodes()[trial % num_nodes]
+		if regular_degree is None:
+			nodes = G.nodes()
 		else:
-			source = random.choice(G.nodes())
+			nodes = [n for n in G.nodes() if G.degree(n) >= regular_degree]
+			
+		source = random.choice(nodes)
 
 		# Spread the message
 		G.spread_message(source, num_corrupt_cnx = theta)
@@ -85,7 +88,16 @@ if __name__ == '__main__':
 	run = 1
 
 	# filename = 'data/bitcoin.gexf'		# Bitcoin snapshot graph
+	# filename = 'data/tree_4.gexf'	# 100 node random regular graph
+	# filename = 'data/tree_5.gexf'	# 100 node random regular graph
 	filename = 'data/random_regular.gexf'	# 100 node random regular graph
+
+	if filename == 'data/tree_4.gexf':
+		regular_degree = 4
+	elif filename == 'data/tree_5.gexf':
+		regular_degree = 5
+	else:
+		regular_degree = None
 	
 	args = parse_arguments()
 	
@@ -98,7 +110,7 @@ if __name__ == '__main__':
 
 	# Convert to Examples and write the result to TFRecords.
 	print 'Creating training data'
-	create_dataset(G, theta, train_trials, 'train', run = run)
+	create_dataset(G, theta, train_trials, 'train', run = run, regular_degree = regular_degree)
 	# print 'Creating validation data'
 	# create_dataset(G, theta, validation_trials, 'validation')
 	print 'Creating test data'
