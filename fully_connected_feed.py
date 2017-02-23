@@ -104,8 +104,34 @@ def do_eval(sess,
   precision = float(true_count) / num_examples
   print('  Num examples: %d  Num correct: %d  Precision @ 1: %0.04f' %
         (num_examples, true_count, precision))
+  return precision
+
+def log_file(nodes, precision, folder='vary_hidden1/'):
+  """
+  Save training results to folder
+  folder: name of folder in ./
+  nodes: number of nodes
+  """
+  try:
+    os.mkdir(folder)
+  except OSError:
+    pass
+  prefix = 'layer1_'
+  num_nodes = str(nodes)
+  suffix = '.csv'
+  filename = os.path.join(folder, prefix +
+                          num_nodes + suffix)
+  try:
+    f = open(filename, 'a')
+  # except IOError:
+  #   f = open(filename,'w')
+  # write precision values as a CSV
+  f.write(str(precision)+',')
+
+  return
 
 
+  return
 def run_training():
   """Train network_setup for a number of steps."""
   # Get the sets of images and labels for training, validation, and
@@ -194,25 +220,28 @@ def run_training():
         saver.save(sess, checkpoint_file, global_step=step)
         # Evaluate against the training set.
         print('Training Data Eval:')
-        do_eval(sess,
+        precision = do_eval(sess,
                 eval_correct,
                 features_placeholder,
                 labels_placeholder,
                 data_sets.train)
+        log_file(FLAGS.hidden1, precision)
         # Evaluate against the validation set.
         print('Validation Data Eval:')
-        do_eval(sess,
+        precision =do_eval(sess,
                 eval_correct,
                 features_placeholder,
                 labels_placeholder,
                 data_sets.validation)
+        log_file(FLAGS.hidden1, precision)
         # Evaluate against the test set.
         print('Test Data Eval:')
-        do_eval(sess,
+        precision = do_eval(sess,
                 eval_correct,
                 features_placeholder,
                 labels_placeholder,
                 data_sets.test)
+        log_file(FLAGS.hidden1, precision)
 
 
 def main(_):
