@@ -275,4 +275,8 @@ if __name__ == '__main__':
   )
 
   FLAGS, unparsed = parser.parse_known_args()
+
+  print('Hidden 1:', FLAGS.hidden1, 'nodes')
+  print('Hidden 2:', FLAGS.hidden2, 'nodes')
+  print('batch size:', FLAGS.batch_size)
   tf.app.run(main=main, argv=[sys.argv[0]] + unparsed)
