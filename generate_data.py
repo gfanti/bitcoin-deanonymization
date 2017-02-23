@@ -67,6 +67,7 @@ def create_dataset(G, theta, trials, name, train = True, run = 1):
 		# labels += [[int(i == source) for i in range(num_nodes)]]
 		labels += [source]
 
+	# save an array to a binary file in NumPy .npy format.
 	with open(filename,'wb') as f:
 		np.save(f, np.array(timestamps))
 
@@ -80,7 +81,7 @@ def create_dataset(G, theta, trials, name, train = True, run = 1):
 
 
 if __name__ == '__main__':
-	theta = 1
+	theta = 1								# number of corrupt connections/node 
 	check_ml = True
 	run = 1
 
@@ -90,8 +91,17 @@ if __name__ == '__main__':
 	args = parse_arguments()
 	
 	spreading_time = 20
+	SM = ['trickle','diffusion']
 
-	G = DataGraphDiffusion(filename, spreading_time = spreading_time)
+	print 'Generating', SM[args.spreading] ,'Graph...'
+
+	if (args.spreading == 0):
+		# trickle
+		G = DataGraphTrickle(filename, spreading_time = spreading_time)
+
+	elif (args.spreading == 1):
+		# diffusion
+		G = DataGraphDiffusion(filename, spreading_time = spreading_time)
 
 	train_trials = args.trials # We'll separate out the validation set later
 	test_trials = train_trials / 10
