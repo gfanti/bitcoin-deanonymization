@@ -14,10 +14,12 @@ class DataGraph(nx.Graph):
 		self.lambda1 = 1 # spreading rate over the diffusion graph
 		
 		
-		# Read graph and label nodes from 1 to N
+		# !! Read graph and label nodes from 0 to N-1
+		# !! why was it labelled so weirdly in the first place
 		mapping = {}
 		for (idx, node) in zip(range(nx.number_of_nodes(self)), self.nodes()):
 			mapping[node] = idx
+
 		nx.relabel_nodes(self, mapping, copy=False)
 
 		self.spreading_time = spreading_time	
