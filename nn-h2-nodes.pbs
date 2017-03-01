@@ -19,5 +19,5 @@ module load python/2
 module load gcc/6.2.0
 
 
-# Run the fully_connected_feed
-/home/limjiaj2/bitcoin-deanonymization/nn-vary-nodes.sh
+# Run fully_connected_feed.py un varied h2 vals
+/home/limjiaj2/bitcoin-deanonymization/nn-h2-nodes.sh

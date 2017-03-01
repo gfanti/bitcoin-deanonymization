@@ -1,5 +1,6 @@
 # utils.py
 import argparse
+import os
 
 # Spreading mechanism constants
 TRICKLE = 0
@@ -27,7 +28,7 @@ def write_results(results_names, results_data, param_types, params, run_num = No
 		f.write(param_type)
 		f.write(': ')
 		for item in param:
-		  f.write("%s " % item)		
+		  f.write("%s " % item)
 		f.write('\n')
 
 	for (result_type, result) in zip(results_names, results_data):
@@ -52,7 +53,7 @@ def parse_arguments():
 						default=1)
 	parser.add_argument("-s","--spreading", type=int, help="Which spreading protocol to use (0)trickle, (1)diffusion",
 						default=0)
-	parser.add_argument("-e","--estimator", dest='estimators',default=[], type=int, 
+	parser.add_argument("-e","--estimator", dest='estimators',default=[], type=int,
 						help="Which estimator to use (0)first-spy, (1)ML, (2)local diffusion", action='append')
 	parser.add_argument("--measure_time", help="measure runtime?",
 						action="store_true")
@@ -69,3 +70,32 @@ def parse_arguments():
 	print 'run: ', args.run
 	print 'num trials: ', args.trials, '\n'
 	return args
+
+def log_file(nodes, precision, testname='none'):
+	"""
+	Save training results to tests/testname/
+	nodes: number of nodes use
+	precision: model precision value
+	testname: test being run. Defaults to 'none'
+	"""
+ 	try:
+		os.mkdir('tests/')
+	except OSError:
+		pass
+
+	test_folder = 'tests/' + testname
+	try:
+		os.mkdir(test_folder)
+	except OSError:
+		pass
+
+	suffix = '.csv'
+	filename = os.path.join(os.path.dirname(__file__),
+			test_folder, testname + '_' +
+			str(nodes) + suffix)
+
+	f = open(filename, 'a')
+
+
+	f.write(str(precision)+',')
+	return

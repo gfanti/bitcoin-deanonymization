@@ -129,7 +129,7 @@ class DataSet(object):
 
   def next_batch(self, batch_size):
     """Return the next `batch_size` examples from this data set."""
-    
+
     total = np.arange(self._num_examples)
     indices = np.random.choice(total, batch_size, replace = False)
     return self._features[indices], self._labels[indices]
@@ -142,7 +142,7 @@ def read_data_sets(train_dir,
                    reshape=True,
                    validation_size=10000,
                    runs = [1]):
-  
+
   TRAIN_FEATURES = 'train'
   TRAIN_LABELS = 'train_labels'
   TEST_FEATURES = 'test'
@@ -154,7 +154,7 @@ def read_data_sets(train_dir,
   test_features = None
   test_labels = None
   for run in runs:
-    run_prefix = 'run' + str(run) + '_' 
+    run_prefix = 'run' + str(run) + '_'
     local_file = os.path.join(os.path.dirname(__file__), train_dir, run_prefix + TRAIN_FEATURES)
     with open(local_file, 'rb') as f:
       if train_features is None:
@@ -179,7 +179,7 @@ def read_data_sets(train_dir,
       else:
         test_features = np.concatenate((test_features, extract_features(f)))
 
-    
+
     local_file = os.path.join(os.path.dirname(__file__), train_dir, run_prefix + TEST_LABELS)
     with open(local_file, 'rb') as f:
       if test_labels is None:

@@ -30,6 +30,8 @@ import tensorflow as tf
 import input_data
 import network_setup
 
+from utils import *
+
 # Basic model parameters as external flags.
 FLAGS = None
 RUNS = [1]
@@ -106,32 +108,6 @@ def do_eval(sess,
         (num_examples, true_count, precision))
   return precision
 
-def log_file(nodes, precision, folder='vary_hidden1/'):
-  """
-  Save training results to folder
-  folder: name of folder in ./
-  nodes: number of nodes
-  """
-  try:
-    os.mkdir(folder)
-  except OSError:
-    pass
-  prefix = 'layer1_'
-  num_nodes = str(nodes)
-  suffix = '.csv'
-  filename = os.path.join(folder, prefix +
-                          num_nodes + suffix)
-
-  f = open(filename, 'a')
-  # except IOError:
-  #   f = open(filename,'w')
-  # write precision values as a CSV
-  f.write(str(precision)+',')
-
-  return
-
-
-  return
 def run_training():
   """Train network_setup for a number of steps."""
   # Get the sets of images and labels for training, validation, and
@@ -225,7 +201,8 @@ def run_training():
                 features_placeholder,
                 labels_placeholder,
                 data_sets.train)
-        log_file(FLAGS.hidden1, precision)
+
+        log_file(FLAGS.hidden1, precision, testname='hid1')
         # Evaluate against the validation set.
         print('Validation Data Eval:')
         precision =do_eval(sess,
@@ -233,7 +210,7 @@ def run_training():
                 features_placeholder,
                 labels_placeholder,
                 data_sets.validation)
-        log_file(FLAGS.hidden1, precision)
+        log_file(FLAGS.hidden1, precision, testname='hid1')
         # Evaluate against the test set.
         print('Test Data Eval:')
         precision = do_eval(sess,
@@ -241,7 +218,7 @@ def run_training():
                 features_placeholder,
                 labels_placeholder,
                 data_sets.test)
-        log_file(FLAGS.hidden1, precision)
+        log_file(FLAGS.hidden1, precision, testname='hid1')
 
 
 def main(_):
