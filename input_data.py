@@ -155,7 +155,7 @@ def read_data_sets(train_dir,
   test_labels = None
   for run in runs:
     run_prefix = 'run' + str(run) + '_' 
-    local_file = os.path.join(train_dir, run_prefix + TRAIN_FEATURES)
+    local_file = os.path.join(os.path.dirname(__file__), train_dir, run_prefix + TRAIN_FEATURES)
     with open(local_file, 'rb') as f:
       if train_features is None:
         train_features = extract_features(f)
@@ -163,7 +163,7 @@ def read_data_sets(train_dir,
         print ('Train features shape', train_features.shape)
         train_features = np.concatenate((train_features, extract_features(f)))
 
-    local_file = os.path.join(train_dir, run_prefix + TRAIN_LABELS)
+    local_file = os.path.join(os.path.dirname(__file__), train_dir, run_prefix + TRAIN_LABELS)
     with open(local_file, 'rb') as f:
       if train_labels is None:
         train_labels = extract_labels(f, one_hot=one_hot)
@@ -172,7 +172,7 @@ def read_data_sets(train_dir,
 
 
     # Testing
-    local_file = os.path.join(train_dir, run_prefix + TEST_FEATURES)
+    local_file = os.path.join(os.path.dirname(__file__), train_dir, run_prefix + TEST_FEATURES)
     with open(local_file, 'rb') as f:
       if test_features is None:
         test_features = extract_features(f)
@@ -180,7 +180,7 @@ def read_data_sets(train_dir,
         test_features = np.concatenate((test_features, extract_features(f)))
 
     
-    local_file = os.path.join(train_dir, run_prefix + TEST_LABELS)
+    local_file = os.path.join(os.path.dirname(__file__), train_dir, run_prefix + TEST_LABELS)
     with open(local_file, 'rb') as f:
       if test_labels is None:
         test_labels = extract_labels(f, one_hot=one_hot)

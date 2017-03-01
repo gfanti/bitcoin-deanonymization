@@ -121,8 +121,8 @@ def log_file(nodes, precision, folder='vary_hidden1/'):
   suffix = '.csv'
   filename = os.path.join(folder, prefix +
                           num_nodes + suffix)
-  try:
-    f = open(filename, 'a')
+
+  f = open(filename, 'a')
   # except IOError:
   #   f = open(filename,'w')
   # write precision values as a CSV
