@@ -3,7 +3,7 @@
 # vary the number of nodes in hidden layer 1
 
 # vary hidden1 from 0 to 1024 nodes
-for value in {0..10}
+for value in {6..7}
 do
     layer1=$((2**$value))
     echo [test: hid1 =  $layer1]
