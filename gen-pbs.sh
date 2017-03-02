@@ -3,5 +3,6 @@
 # 1st arugment -  testname
 # 2nd argument -  arg for test
 
-cp qsub-template.pbs $1.pbs
-echo ./$1.sh $2 >> $1.pbs
+FILENAME=jobs/$1.pbs
+cp qsub-template.pbs $FILENAME
+echo ./$1.sh $2 >> $FILENAME

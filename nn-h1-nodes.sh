@@ -1,11 +1,8 @@
 #!/bin/bash
+# this program varies the number of nodes in the first layer
+# 1st argument : number of nodes in first layer
 
-# vary the number of nodes in hidden layer 1
 
-# vary hidden1 from 0 to 1024 nodes
-for value in {6..7}
-do
-    layer1=$((2**$value))
-    echo [test: hid1 =  $layer1]
-    python fully_connected_feed.py --max_steps 300000 --hidden1 $layer1
-done
+/bin/bash: indent: command not found
+echo [test: hid1 =  $1]
+python fully_connected_feed.py --max_steps 300000 --hidden1 $1
