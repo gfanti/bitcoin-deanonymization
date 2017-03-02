@@ -5,5 +5,5 @@ FILES=jobs/*
 for f in $FILES
 do
     echo "sending $f..."
-    # qsub $f
+    qsub $f
 done
