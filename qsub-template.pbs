@@ -1,0 +1,22 @@
+#!/bin/bash
+#
+#PBS -l walltime=04:00:00
+#PBS -l nodes=1:ppn=12:golub
+#PBS -N nn-vary-nodes
+#PBS -q secondary
+#
+# End of embedded QSUB options
+#
+
+# execute in my virtual env
+source /home/limjiaj2/bitcoin-deanonymization/venv/bin/activate
+
+# change to bitcoin dir
+cd /home/limjiaj2/bitcoin-deanonymization
+
+# load necessary modules
+module load python/2
+module load gcc/6.2.0
+
+
+# insert program here

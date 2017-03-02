@@ -1,0 +1,4 @@
+data/run*
+data/.DS_Store
+logs/
+*.pyc
