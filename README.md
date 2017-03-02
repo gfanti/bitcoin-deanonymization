@@ -13,46 +13,49 @@ data and training a neural network (through TensorFlow).
 - `testscripts/`: folder containing the tests scripts (shell files)
 
 - `gen-pbs.sh`: populates `jobs/` with `.pbs` files
-- `qsub.sh`: submits all my jobs in `jobs/`
+- `qsub.sh`: submits all my jobs in `jobs/` to campus cluster
+
+Notable files
+- `generate_data.py`
 - `dataset_graph_rep.py`
+- `first_spy_stimate_data.py`
 - `fully_connected_feed.py`
+- `utils.py`
+- `vis-tests.ipynb`
 
 ## Usage
-1) To create a dataset, here's an example call:
+1. To create a dataset, here's an example call:
 
-`python generate_data.py -t 300000`
+	`python generate_data.py -t 300000`
 
-Flags:
+	Flags:
 
-	-t		number of trials
-	-r		run number. This is used if we generate more than one
-			  dataset due to memory limitations
-			  [This flag is not yet implemented]
-	-s		type of spreading: (0) Diffusion (default), (1) Trickle
+		-t		number of trials
+		-r		run number. This is used if we generate more than one
+				  dataset due to memory limitations
+				  [This flag is not yet implemented]
+		-s		type of spreading: (0) Diffusion (default), (1) Trickle
 
-Generates a dataset of 300,000 data items. Each item represents a
-single simulation of a diffusion process, associated with the true
-source node (this is the output label).
+	This example generates a dataset of 300,000 data items. Each item represents a single simulation of a diffusion process, associated with the true source node (this is the output label).
 
+2. To train a neural network, here's an example call:
 
-2) To train a neural network, here's an example call:
+	```
+	python fully_connected_feed.py --max_steps 1000000
+	```
+	or
+	```
+	python fully_connected_feed.py --max_steps 1000000 --restore
+	```
 
-```
-python fully_connected_feed.py --max_steps 1000000
-```
-or
-```
-python fully_connected_feed.py --max_steps 1000000 --restore
-```
+	Flags:
 
-Flags:
-
-	--max_steps 		(int) number of iterations for training
-	--restore			(no argument) restores the previously
-							trained model (in directory 'logs')
-							and continues training
-	--batch_size		(int) batch size in each training step
-	--hidden1			(int) number of nodes in first hidden
-							layer
-	--hidden2			(int) number of nodes in second hidden
-							layer
+		--max_steps 		(int) number of iterations for training
+		--restore			(no argument) restores the previously
+								trained model (in directory 'logs')
+								and continues training
+		--batch_size		(int) batch size in each training step
+		--hidden1			(int) number of nodes in first hidden
+								layer
+		--hidden2			(int) number of nodes in second hidden
+								layer

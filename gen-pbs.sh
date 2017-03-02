@@ -7,6 +7,21 @@
 # hid1 [num nodes]
 # hid2 [num nodes]
 # datasize [size]
+testnames=['hid1','hid2','datasize']
+
+function usage {
+    echo "Usage: ./gen-pbs.sh <TESTNAME> <ARG> where"
+    echo "       TESTNAME : hid1, hid2, datasize and"
+    echo "       ARG      : num nodes, numnodes, size"
+    echo "       respectively"
+    echo "Sideeffects: create file in jobs/"
+}
+if [ $# -eq 0 ]; then
+    usage;
+    exit 1
+fi
+
+# NO ERROR CHECKING ON TESTNAMES
 
 FILENAME=jobs/test-$1-$2.pbs
 if [ -e $FILENAME ];
