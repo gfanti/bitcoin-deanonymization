@@ -6,12 +6,17 @@ data-provided graph. There are two facets to the code: generating
 data and training a neural network (through TensorFlow).
 
 ## Contents
-- `dataset_graph_rep.py`
-- `fully_connected_feed.py`
+- `data/`: graph data for bitcoin network
+- `jobs/` : contains the `.pbs` files to send to campus cluster
 - `logs/`: generated neural network model
 - `tests/`: contains the folders of tests ran. Each folder consists of csv files holding the results
-- `jobs/` : contains the `.pbs` files to send to campus cluster
+- `testscripts/`: folder containing the tests scripts (shell files)
+
 - `gen-pbs.sh`: populates `jobs/` with `.pbs` files
+- `qsub.sh`: submits all my jobs in `jobs/`
+- `dataset_graph_rep.py`
+- `fully_connected_feed.py`
+
 ## Usage
 1) To create a dataset, here's an example call:
 
