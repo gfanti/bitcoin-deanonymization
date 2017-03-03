@@ -198,7 +198,7 @@ def read_data_sets(train_dir,
   if not 0 <= validation_size <= len(train_features):
     raise ValueError(
         'Validation size should be between 0 and {}. Received: {}.'
-        .format(len(train_images), validation_size))
+        .format(len(train_features), validation_size))
 
   validation_features = train_features[:validation_size]
   validation_labels = train_labels[:validation_size]
