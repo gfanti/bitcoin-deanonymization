@@ -29,17 +29,17 @@ def _bytes_feature(value):
 
 
 def create_dataset(G, theta, trials, name, train = True, run = 1):
-	''' Creates a dataset by spreading over graph G. 
+	''' Creates a dataset by spreading over graph G.
 	Inputs:
 		G 		graph object
 		theta 	number of corrupt connections per node
 		name 	filename to write to
 		train 	is this a training dataset (True) or test dataset (False)?
-		run 	the index of the dataset. Only used if dataset is too large 
+		run 	the index of the dataset. Only used if dataset is too large
 					to fit in memory
 	'''
 
-	run_prefix = 'run' + str(run) + '_' 
+	run_prefix = 'run' + str(run) + '_'
 	filename = os.path.join('data/', run_prefix + name)
 	# filename = os.path.join('data/' + name + str(run))
 	label_filename = os.path.join('data/' + run_prefix + name + '_labels')
@@ -81,14 +81,14 @@ def create_dataset(G, theta, trials, name, train = True, run = 1):
 
 
 if __name__ == '__main__':
-	theta = 1								# number of corrupt connections/node 
+	theta = 1								# number of corrupt connections/node
 	check_ml = True
 
 	# filename = 'data/bitcoin.gexf'		# Bitcoin snapshot graph
 	filename = 'data/random_regular.gexf'	# 100 node random regular graph
-	
+
 	args = parse_arguments()
-	
+
 	spreading_time = 20
 	SM = ['trickle','diffusion']
 
@@ -113,6 +113,3 @@ if __name__ == '__main__':
 	# create_dataset(G, theta, validation_trials, 'validation', run = args.run)
 	print 'Creating test data'
 	create_dataset(G, theta, test_trials, 'test', train = False, run = args.run)
-
-		
-

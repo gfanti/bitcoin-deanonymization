@@ -52,7 +52,7 @@ def parse_arguments():
 	parser.add_argument("-t","--trials", type=int, help="number of trials",
 						default=1)
 	parser.add_argument("-s","--spreading", type=int, help="Which spreading protocol to use (0)trickle, (1)diffusion",
-						default=0)
+						default=1)
 	parser.add_argument("-e","--estimator", dest='estimators',default=[], type=int,
 						help="Which estimator to use (0)first-spy, (1)ML, (2)local diffusion", action='append')
 	parser.add_argument("--measure_time", help="measure runtime?",
