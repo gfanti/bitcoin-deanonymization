@@ -202,7 +202,7 @@ def run_training():
                 labels_placeholder,
                 data_sets.train)
 
-        log_file(FLAGS.hidden1, precision, testname='hid1')
+        log_file(FLAGS.hidden1, precision, testname='100x100')
         # Evaluate against the validation set.
         print('Validation Data Eval:')
         precision =do_eval(sess,
@@ -210,7 +210,7 @@ def run_training():
                 features_placeholder,
                 labels_placeholder,
                 data_sets.validation)
-        log_file(FLAGS.hidden1, precision, testname='hid1')
+        log_file(FLAGS.hidden1, precision, testname='100x100')
         # Evaluate against the test set.
         print('Test Data Eval:')
         precision = do_eval(sess,
@@ -218,7 +218,7 @@ def run_training():
                 features_placeholder,
                 labels_placeholder,
                 data_sets.test)
-        log_file(FLAGS.hidden1, precision, testname='hid1')
+        log_file(FLAGS.hidden1, precision, testname='100x100')
 
 
 def main(_):
