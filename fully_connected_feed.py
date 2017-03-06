@@ -279,10 +279,22 @@ if __name__ == '__main__':
       help='If true, loads the stored model and continues training.',
       action='store_true'
   )
+  parser.add_argument(
+      '--runs',
+      default=1,
+      help='loads the number of runs.',
+  )
+
 
   FLAGS, unparsed = parser.parse_known_args()
+
+  # append more runs
+  for run in range(1,int(FLAGS.runs)+1):
+	if (run > 1):
+		RUNS += [run]
 
   print('Hidden 1:', FLAGS.hidden1, 'nodes')
   print('Hidden 2:', FLAGS.hidden2, 'nodes')
   print('batch size:', FLAGS.batch_size)
+  print('runs:', FLAGS.runs)
   tf.app.run(main=main, argv=[sys.argv[0]] + unparsed)

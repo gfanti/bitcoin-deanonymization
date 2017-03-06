@@ -83,7 +83,6 @@ def create_dataset(G, theta, trials, name, train = True, run = 1):
 if __name__ == '__main__':
 	theta = 1								# number of corrupt connections/node 
 	check_ml = True
-	run = 1
 
 	# filename = 'data/bitcoin.gexf'		# Bitcoin snapshot graph
 	filename = 'data/random_regular.gexf'	# 100 node random regular graph
@@ -94,6 +93,7 @@ if __name__ == '__main__':
 	SM = ['trickle','diffusion']
 
 	print 'Generating', SM[args.spreading] ,'Graph...'
+	print 'run number #', args.run ,'...'
 
 	if (args.spreading == 0):
 		# trickle
@@ -108,11 +108,11 @@ if __name__ == '__main__':
 
 	# Convert to Examples and write the result to TFRecords.
 	print 'Creating training data'
-	create_dataset(G, theta, train_trials, 'train', run = run)
+	create_dataset(G, theta, train_trials, 'train', run = args.run)
 	# print 'Creating validation data'
-	# create_dataset(G, theta, validation_trials, 'validation')
+	# create_dataset(G, theta, validation_trials, 'validation', run = args.run)
 	print 'Creating test data'
-	create_dataset(G, theta, test_trials, 'test', train = False, run = run)
+	create_dataset(G, theta, test_trials, 'test', train = False, run = args.run)
 
 		
 

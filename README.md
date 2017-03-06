@@ -26,14 +26,13 @@ Notable files
 ## Usage
 1. To create a dataset, here's an example call:
 
-	`python generate_data.py -t 300000`
+	`python generate_data.py -r 1 -t 300000`
 
 	Flags:
 
-		-t		number of trials
 		-r		run number. This is used if we generate more than one
 				  dataset due to memory limitations
-				  [This flag is not yet implemented]
+		-t		number of trials
 		-s		type of spreading: (0) Diffusion (default), (1) Trickle
 
 	This example generates a dataset of 300,000 data items. Each item represents a single simulation of a diffusion process, associated with the true source node (this is the output label).
@@ -51,11 +50,11 @@ Notable files
 	Flags:
 
 		--max_steps 		(int) number of iterations for training
-		--restore			(no argument) restores the previously
-								trained model (in directory 'logs')
-								and continues training
+		--restore		(no argument) restores the previously
+					  trained model (in directory 'logs')
+					  and continues training
 		--batch_size		(int) batch size in each training step
-		--hidden1			(int) number of nodes in first hidden
-								layer
-		--hidden2			(int) number of nodes in second hidden
-								layer
+		--hidden1		(int) number of nodes in first hidden
+					  layer
+		--hidden2		(int) number of nodes in second hidden
+					  layer

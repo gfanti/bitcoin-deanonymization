@@ -11,8 +11,8 @@ testnames=['hid1','hid2','datasize']
 
 function usage {
     echo "Usage: ./gen-pbs.sh <TESTNAME> <ARG> where"
-    echo "       TESTNAME : hid1, hid2, datasize and"
-    echo "       ARG      : num nodes, numnodes, size"
+    echo "       TESTNAME : hid1, hid2, datasize, gendata and"
+    echo "       ARG      : num nodes, numnodes, size, run number"
     echo "       respectively"
     echo "Sideeffects: create file in jobs/"
 }
