@@ -1,4 +1,7 @@
-# bitcoin-deanonymization
+**[Contents](#contents)** |
+**[Usage](#usage)**
+
+# Bitcoin Deanonymization
 
 
 This code creates a dataset of timestamps and sources for a given,
@@ -44,7 +47,7 @@ Notable files
 	```
 	or
 	```
-	python fully_connected_feed.py --max_steps 1000000 --restore
+	python fully_connected_feed.py --runs 5 --max_steps 1000000 --restore
 	```
 
 	Flags:
@@ -58,3 +61,8 @@ Notable files
 					  layer
 		--hidden2		(int) number of nodes in second hidden
 					  layer
+
+---
+
+**[Contents](#contents)** |
+**[Usage](#usage)**
