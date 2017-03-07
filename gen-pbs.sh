@@ -7,12 +7,13 @@
 # hid1 [num nodes]
 # hid2 [num nodes]
 # datasize [size]
-testnames=['hid1','hid2','datasize']
+# gendata [run number]
+testnames=['hid1','hid2','datasize','gendata']
 
 function usage {
     echo "Usage: ./gen-pbs.sh <TESTNAME> <ARG> where"
     echo "       TESTNAME : hid1, hid2, datasize, gendata and"
-    echo "       ARG      : num nodes, numnodes, size, run number"
+    echo "       ARG      : num nodes, numnodes, addl runs, run number"
     echo "       respectively"
     echo "Sideeffects: create file in jobs/"
 }
