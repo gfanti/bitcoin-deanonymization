@@ -36,7 +36,7 @@ Notable files
 		-r		run number. This is used if we generate more than one
 				  dataset due to memory limitations
 		-t		number of trials
-		-s		type of spreading: (0) Diffusion (default), (1) Trickle
+		-s		type of spreading: (0) Trickle, (1) Diffusion (default)
 
 	This example generates a dataset of 300,000 data items. Each item represents a single simulation of a diffusion process, associated with the true source node (this is the output label).
 
