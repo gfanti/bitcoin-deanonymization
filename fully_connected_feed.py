@@ -21,6 +21,7 @@ from __future__ import print_function
 # pylint: disable=missing-docstring
 import argparse
 import os.path
+import os
 import sys
 import time
 
@@ -35,6 +36,7 @@ from utils import *
 # Basic model parameters as external flags.
 FLAGS = None
 RUNS = [1]
+LOG_DIR = 'logs'
 
 
 def placeholder_inputs(batch_size):
@@ -139,13 +141,13 @@ def run_training():
 
     # Create a saver for writing training checkpoints.
     saver = tf.train.Saver()
-    checkpoint_file = os.path.join(FLAGS.log_dir, 'model.ckpt')
+    checkpoint_file = os.path.join(LOG_DIR, 'model.ckpt')
 
     # Create a session for running Ops on the Graph.
     sess = tf.Session()
 
     # Instantiate a SummaryWriter to output summaries and the Graph.
-    summary_writer = tf.summary.FileWriter(FLAGS.log_dir, sess.graph)
+    summary_writer = tf.summary.FileWriter(LOG_DIR, sess.graph)
 
     if not FLAGS.restore:
       # Start a new training session
@@ -157,7 +159,7 @@ def run_training():
       sess.run(init)
     else:
       # Restore variables from disk.
-      latest_checkpoint = tf.train.latest_checkpoint(FLAGS.log_dir)
+      latest_checkpoint = tf.train.latest_checkpoint(LOG_DIR)
 
       saver.restore(sess, latest_checkpoint)
       print("Model restored.")
@@ -202,7 +204,7 @@ def run_training():
                 labels_placeholder,
                 data_sets.train)
 
-        log_file(FLAGS.hidden1, precision, testname='100x100')
+        log_file(str(300000+(int(FLAGS.runs)-1)*50000), precision, testname='datasize')
         # Evaluate against the validation set.
         print('Validation Data Eval:')
         precision =do_eval(sess,
@@ -210,7 +212,7 @@ def run_training():
                 features_placeholder,
                 labels_placeholder,
                 data_sets.validation)
-        log_file(FLAGS.hidden1, precision, testname='100x100')
+        log_file(str(300000+(int(FLAGS.runs)-1)*50000), precision, testname='datasize')
         # Evaluate against the test set.
         print('Test Data Eval:')
         precision = do_eval(sess,
@@ -218,14 +220,14 @@ def run_training():
                 features_placeholder,
                 labels_placeholder,
                 data_sets.test)
-        log_file(FLAGS.hidden1, precision, testname='100x100')
+        log_file(str(300000+(int(FLAGS.runs)-1)*50000), precision, testname='datasize')
 
 
 def main(_):
   if not FLAGS.restore:
-    if tf.gfile.Exists(FLAGS.log_dir):
-      tf.gfile.DeleteRecursively(FLAGS.log_dir)
-    tf.gfile.MakeDirs(FLAGS.log_dir)
+    if tf.gfile.Exists(LOG_DIR):
+      tf.gfile.DeleteRecursively(LOG_DIR)
+    tf.gfile.MakeDirs(LOG_DIR)
   run_training()
 
 
@@ -293,8 +295,17 @@ if __name__ == '__main__':
 	if (run > 1):
 		RUNS += [run]
 
+  # private log directory
+  LOG_DIR = os.path.join(LOG_DIR, 'runs'+str(RUNS[-1]))
+  try:
+    os.mkdir(LOG_DIR)
+    print('made at' + LOG_DIR)
+  except OSError:
+    print('error making dir')
+
   print('Hidden 1:', FLAGS.hidden1, 'nodes')
   print('Hidden 2:', FLAGS.hidden2, 'nodes')
   print('batch size:', FLAGS.batch_size)
   print('runs:', FLAGS.runs)
+  print('log_dir:', LOG_DIR)
   tf.app.run(main=main, argv=[sys.argv[0]] + unparsed)
