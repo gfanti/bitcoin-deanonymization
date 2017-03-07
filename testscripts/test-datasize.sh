@@ -1,6 +1,5 @@
 #!/bin/bash
 # this test varies the size of the data
-# 1st argument : data size
+# 1st argument : number of additional 50,000 block datapoints
 
-python generate_data.py -t $1
-python fully_connected_feed.py --max_steps 300000
+python fully_connected_feed.py --runs $1 --max_steps 300000
