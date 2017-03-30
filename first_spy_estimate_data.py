@@ -70,12 +70,13 @@ def first_spy_correct(data_item):
 	return 0.0
 
 if __name__=='__main__':
-	runs = [1]
+	runs = [1,2,3]
 
 	data_dir = 'data'
 
+	dataset = []
 	for run in runs:
-		dataset = read_data_sets(data_dir, run)
+		dataset += read_data_sets(data_dir, run)
 
 	accuracy = 0.0
 	cnt = 0

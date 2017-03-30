@@ -28,15 +28,15 @@ def _bytes_feature(value):
 	return tf.train.Feature(bytes_list=tf.train.BytesList(value=[value]))
 
 
-def create_dataset(G, theta, trials, name, train = True, run = 1):
-	''' Creates a dataset by spreading over graph G.
+def create_dataset(G, theta, trials, name, run = 1, regular_degree = None):
+	''' Creates a dataset by spreading over graph G. 
 	Inputs:
 		G 		graph object
 		theta 	number of corrupt connections per node
 		name 	filename to write to
-		train 	is this a training dataset (True) or test dataset (False)?
 		run 	the index of the dataset. Only used if dataset is too large
 					to fit in memory
+		regular_degree 	the degree of the tree, if graph is a regular tree
 	'''
 
 	run_prefix = 'run' + str(run) + '_'
@@ -52,10 +52,12 @@ def create_dataset(G, theta, trials, name, train = True, run = 1):
 
 	num_nodes = nx.number_of_nodes(G)
 	for trial in tqdm(range(trials)):
-		if train:
-			source = G.nodes()[trial % num_nodes]
+		if regular_degree is None:
+			nodes = G.nodes()
 		else:
-			source = random.choice(G.nodes())
+			nodes = [n for n in G.nodes() if G.degree(n) >= regular_degree]
+			
+		source = random.choice(nodes)
 
 		# Spread the message
 		G.spread_message(source, num_corrupt_cnx = theta)
@@ -74,19 +76,22 @@ def create_dataset(G, theta, trials, name, train = True, run = 1):
 	with open(label_filename, 'wb') as f:
 		np.save(f, np.array(labels))
 
-
-
-
-
-
-
 if __name__ == '__main__':
 	theta = 1								# number of corrupt connections/node
 	check_ml = True
 
 	# filename = 'data/bitcoin.gexf'		# Bitcoin snapshot graph
+	# filename = 'data/tree_4.gexf'	# 100 node random regular graph
+	# filename = 'data/tree_5.gexf'	# 100 node random regular graph
 	filename = 'data/random_regular.gexf'	# 100 node random regular graph
 
+	if filename == 'data/tree_4.gexf':
+		regular_degree = 4
+	elif filename == 'data/tree_5.gexf':
+		regular_degree = 5
+	else:
+		regular_degree = None
+	
 	args = parse_arguments()
 
 	spreading_time = 20
@@ -108,8 +113,8 @@ if __name__ == '__main__':
 
 	# Convert to Examples and write the result to TFRecords.
 	print 'Creating training data'
-	create_dataset(G, theta, train_trials, 'train', run = args.run)
+	create_dataset(G, theta, train_trials, 'train', run = run, regular_degree = regular_degree)
 	# print 'Creating validation data'
 	# create_dataset(G, theta, validation_trials, 'validation', run = args.run)
 	print 'Creating test data'
-	create_dataset(G, theta, test_trials, 'test', train = False, run = args.run)
+	create_dataset(G, theta, test_trials, 'test', run = args.run)
