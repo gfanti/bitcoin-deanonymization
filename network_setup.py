@@ -28,6 +28,7 @@ from __future__ import division
 from __future__ import print_function
 
 import math
+import numpy as np
 
 import tensorflow as tf
 
@@ -37,25 +38,39 @@ NUM_CLASSES = 100
 # The MNIST images are always 28x28 pixels.
 FEATURE_SIZE = NUM_CLASSES
 
-def inference(timestamps, hidden1_units, hidden2_units):
+def inference(timestamps, hidden1_units, hidden2_units, adj_list):
   """Build the model up to where it may be used for inference.
   Args:
     timestamps: Images placeholder, from inputs().
     hidden1_units: Size of the first hidden layer.
     hidden2_units: Size of the second hidden layer.
+    adj_list: dictionary of node-neighbors.
   Returns:
     softmax_linear: Output tensor with the computed logits.
   """
+  num_nodes = len(adj_list.keys())
+  if (num_nodes == hidden1_units):
+      print('\trunning CNN...')
+
   # Hidden 1
   with tf.name_scope('hidden1'):
-    weights = tf.Variable(
-        tf.truncated_normal([FEATURE_SIZE, hidden1_units],
-                            stddev=1.0 / math.sqrt(float(FEATURE_SIZE))),
-        name='weights')
-    print('weights', weights)
+    print('Feature size', FEATURE_SIZE)
+    print('hidden1_units', hidden1_units)
+
+    val = np.zeros((num_nodes, num_nodes))
+    # only neighbors are non-zero
+    for node in range(num_nodes):
+        neighbors = adj_list[node]
+        for v in neighbors:
+            val[node,v] = np.random.normal()
+
+    weights = tf.Variable(val
+                        , name='weights',dtype=tf.float32)
+    print('input weights', weights)
     biases = tf.Variable(tf.zeros([hidden1_units]),
                          name='biases')
     hidden1 = tf.nn.relu(tf.matmul(timestamps, weights) + biases)
+
   # Hidden 2
   with tf.name_scope('hidden2'):
     weights = tf.Variable(

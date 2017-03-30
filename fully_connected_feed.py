@@ -24,6 +24,7 @@ import os.path
 import os
 import sys
 import time
+import networkx as nx
 
 from six.moves import xrange  # pylint: disable=redefined-builtin
 import tensorflow as tf
@@ -122,10 +123,36 @@ def run_training():
     features_placeholder, labels_placeholder = placeholder_inputs(
         FLAGS.batch_size)
 
+    # open up graph to understand graph structure
+    filename = 'data/random_regular.gexf'	# 100 node random regular graph
+    G = nx.read_gexf(filename)
+
+    # create adjacency list
+    num_nodes = len(G.nodes())
+    adj_list = {}
+
+    for node in G.nodes():
+        adj_list[int(node)] = list(map(int, G.neighbors(node)))
+
+    # 0 mask for CNN
+    indices = []  # A list of coordinates to update.
+    updates = []   # A list of values corresponding to the respective
+                    # coordinate in indices.
+    for node in range(num_nodes):
+        neighbors = adj_list[node]
+        for v in range(num_nodes):
+            if v in neighbors:
+                pass
+            else:
+                # force nodes to 0
+                indices += [[node,v]]
+                updates += [0.0]
+    print('percentage of flattened nodes:', len(updates)/ (num_nodes*num_nodes))
     # Build a Graph that computes predictions from the inference model.
     logits = network_setup.inference(features_placeholder,
                              FLAGS.hidden1,
-                             FLAGS.hidden2)
+                             FLAGS.hidden2,
+                             adj_list)
 
     # Add to the Graph the Ops for loss calculation.
     loss = network_setup.loss(logits, labels_placeholder)
@@ -166,61 +193,64 @@ def run_training():
 
     # Start the training loop.
     for step in xrange(FLAGS.max_steps):
-      start_time = time.time()
+        start_time = time.time()
 
-      # Fill a feed dictionary with the actual set of images and labels
-      # for this particular training step.
-      feed_dict = fill_feed_dict(data_sets.train,
+        # Fill a feed dictionary with the actual set of images and labels
+        # for this particular training step.
+        feed_dict = fill_feed_dict(data_sets.train,
                                  features_placeholder,
                                  labels_placeholder)
-
-      # Run one step of the model.  The return values are the activations
-      # from the `train_op` (which is discarded) and the `loss` Op.  To
-      # inspect the values of your Ops or variables, you may include them
-      # in the list passed to sess.run() and the value tensors will be
-      # returned in the tuple from the call.
-      _, loss_value = sess.run([train_op, loss],
+        # Run one step of the model.  The return values are the activations
+        # from the `train_op` (which is discarded) and the `loss` Op.  To
+        # inspect the values of your Ops or variables, you may include them
+        # in the list passed to sess.run() and the value tensors will be
+        # returned in the tuple from the call.
+        _, loss_value = sess.run([train_op, loss],
                                feed_dict=feed_dict)
 
-      duration = time.time() - start_time
+        # CNN property: modfy weights to 0
+        weights = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope="hidden1")[0]
+        weights = tf.scatter_nd_update(weights,indices, updates)
+        # print(weights.eval(session=sess))
+        duration = time.time() - start_time
 
-      # Write the summaries and print an overview fairly often.
-      if step % 100 == 0:
-        # Print status to stdout.
-        print('Step %d: loss = %.2f (%.3f sec)' % (step, loss_value, duration))
-        # Update the events file.
-        summary_str = sess.run(summary, feed_dict=feed_dict)
-        summary_writer.add_summary(summary_str, step)
-        summary_writer.flush()
+        # Write the summaries and print an overview fairly often.
+        if step % 100 == 0:
+            # Print status to stdout.
+            print('Step %d: loss = %.2f (%.3f sec)' % (step, loss_value, duration))
+            # Update the events file.
+            summary_str = sess.run(summary, feed_dict=feed_dict)
+            summary_writer.add_summary(summary_str, step)
+            summary_writer.flush()
 
-      # Save a checkpoint and evaluate the model periodically.
-      if (step + 1) % 1000 == 0 or (step + 1) == FLAGS.max_steps:
-        saver.save(sess, checkpoint_file, global_step=step)
-        # Evaluate against the training set.
-        print('Training Data Eval:')
-        precision = do_eval(sess,
-                eval_correct,
-                features_placeholder,
-                labels_placeholder,
-                data_sets.train)
+        # Save a checkpoint and evaluate the model periodically.
+        if (step + 1) % 1000 == 0 or (step + 1) == FLAGS.max_steps:
+            saver.save(sess, checkpoint_file, global_step=step)
+            # Evaluate against the training set.
+            print('Training Data Eval:')
+            precision = do_eval(sess,
+                    eval_correct,
+                    features_placeholder,
+                    labels_placeholder,
+                    data_sets.train)
 
-        log_file(str(300000+(int(FLAGS.runs)-1)*50000), precision, testname='datasize')
-        # Evaluate against the validation set.
-        print('Validation Data Eval:')
-        precision =do_eval(sess,
-                eval_correct,
-                features_placeholder,
-                labels_placeholder,
-                data_sets.validation)
-        log_file(str(300000+(int(FLAGS.runs)-1)*50000), precision, testname='datasize')
-        # Evaluate against the test set.
-        print('Test Data Eval:')
-        precision = do_eval(sess,
-                eval_correct,
-                features_placeholder,
-                labels_placeholder,
-                data_sets.test)
-        log_file(str(300000+(int(FLAGS.runs)-1)*50000), precision, testname='datasize')
+            log_file(str(300000+(int(FLAGS.runs)-1)*50000), precision, testname='cnn')
+            # Evaluate against the validation set.
+            print('Validation Data Eval:')
+            precision =do_eval(sess,
+                    eval_correct,
+                    features_placeholder,
+                    labels_placeholder,
+                    data_sets.validation)
+            log_file(str(300000+(int(FLAGS.runs)-1)*50000), precision, testname='cnn')
+            # Evaluate against the test set.
+            print('Test Data Eval:')
+            precision = do_eval(sess,
+                    eval_correct,
+                    features_placeholder,
+                    labels_placeholder,
+                    data_sets.test)
+            log_file(str(300000+(int(FLAGS.runs)-1)*50000), precision, testname='cnn')
 
 
 def main(_):
@@ -297,6 +327,7 @@ if __name__ == '__main__':
 
   # private log directory
   LOG_DIR = os.path.join(LOG_DIR, 'runs'+str(RUNS[-1]))
+  print(LOG_DIR)
   try:
     os.mkdir(LOG_DIR)
     print('made at' + LOG_DIR)
