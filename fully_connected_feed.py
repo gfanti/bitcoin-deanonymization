@@ -36,6 +36,7 @@ from utils import *
 
 # Basic model parameters as external flags.
 FLAGS = None
+# RUNS = [1,2,3,4]
 RUNS = [1]
 LOG_DIR = 'logs'
 
