@@ -47,20 +47,22 @@ Notable files
 	```
 	or
 	```
-	python fully_connected_feed.py --runs 5 --max_steps 1000000 --restore
+	python fully_connected_feed.py --runs 5 --max_steps 1000000 --restore --testname cnn
 	```
 
 	Flags:
 
 		--max_steps 		(int) number of iterations for training
-		--restore		(no argument) restores the previously
-					  trained model (in directory 'logs')
-					  and continues training
+		--restore			(no argument) restores the previously
+					  		trained model (in directory 'logs')
+					  		and continues training
 		--batch_size		(int) batch size in each training step
-		--hidden1		(int) number of nodes in first hidden
-					  layer
-		--hidden2		(int) number of nodes in second hidden
-					  layer
+		--hidden1			(int) number of nodes in first hidden
+					  		layer
+		--hidden2			(int) number of nodes in second hidden
+					  		layer
+		--testname			(str) specify testname to save in appropriate
+					  		`tests/` subfolder
 
 ---
 

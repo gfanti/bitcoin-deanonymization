@@ -235,7 +235,7 @@ def run_training():
                     labels_placeholder,
                     data_sets.train)
 
-            log_file(str(300000+(int(FLAGS.runs)-1)*50000), precision, testname='cnn')
+            log_file(str(300000+(int(FLAGS.runs)-1)*50000), precision, testname=FLAGS.testname)
             # Evaluate against the validation set.
             print('Validation Data Eval:')
             precision =do_eval(sess,
@@ -243,7 +243,7 @@ def run_training():
                     features_placeholder,
                     labels_placeholder,
                     data_sets.validation)
-            log_file(str(300000+(int(FLAGS.runs)-1)*50000), precision, testname='cnn')
+            log_file(str(300000+(int(FLAGS.runs)-1)*50000), precision, testname=FLAGS.testname)
             # Evaluate against the test set.
             print('Test Data Eval:')
             precision = do_eval(sess,
@@ -251,7 +251,7 @@ def run_training():
                     features_placeholder,
                     labels_placeholder,
                     data_sets.test)
-            log_file(str(300000+(int(FLAGS.runs)-1)*50000), precision, testname='cnn')
+            log_file(str(300000+(int(FLAGS.runs)-1)*50000), precision, testname=FLAGS.testname)
 
 
 def main(_):
@@ -316,6 +316,12 @@ if __name__ == '__main__':
       '--runs',
       default=1,
       help='loads the number of runs.',
+  )
+
+  parser.add_argument(
+      '--testname',
+      default='unknown-test',
+      help='specify testname to save in appropriate tests/ subfolder',
   )
 
 
