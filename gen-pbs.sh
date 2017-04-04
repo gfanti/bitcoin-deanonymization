@@ -13,7 +13,7 @@
 testnames=['hid1','hid2','datasize','gendata','cnn']
 
 function usage {
-    echo "Usage: ./gen-pbs.sh <TESTNAME> <ARG> where"
+    echo "Usage: ./gen-pbs.sh <TESTNAME> <ARG> <TEST TIME> where"
     echo "       TESTNAME : hid1, hid2, datasize, gendata, cnn and"
     echo "       ARG      : num nodes, numnodes, addl runs, run number, run number and"
     echo "       TIME     : num hours"
