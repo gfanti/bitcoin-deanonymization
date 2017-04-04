@@ -61,12 +61,13 @@ def inference(timestamps, hidden1_units, hidden2_units, adj_list):
     print('Feature size', FEATURE_SIZE)
     print('hidden1_units', hidden1_units)
 
-    val = np.zeros((num_nodes, num_nodes))
+    val = np.zeros((FEATURE_SIZE, hidden1_units))
     # only neighbors are non-zero
-    for node in range(num_nodes):
-        neighbors = adj_list[node]
-        for v in neighbors:
-            val[node,v] = np.random.normal()
+    if (num_nodes == hidden1_units):
+        for node in range(num_nodes):
+            neighbors = adj_list[node]
+            for v in neighbors:
+                val[node,v] = np.random.normal()
 
     weights = tf.Variable(val
                         , name='weights',dtype=tf.float32)

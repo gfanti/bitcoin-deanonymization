@@ -219,6 +219,7 @@ def run_training():
         if step % 100 == 0:
             # Print status to stdout.
             print('Step %d: loss = %.2f (%.3f sec)' % (step, loss_value, duration))
+            log_file(str(300000+(int(FLAGS.runs)-1)*50000), loss_value, testname=FLAGS.testname + 'loss')
             # Update the events file.
             summary_str = sess.run(summary, feed_dict=feed_dict)
             summary_writer.add_summary(summary_str, step)

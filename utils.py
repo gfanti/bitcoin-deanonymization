@@ -71,11 +71,11 @@ def parse_arguments():
 	print 'num trials: ', args.trials, '\n'
 	return args
 
-def log_file(nodes, precision, testname='none'):
+def log_file(nodes, value, testname='none'):
 	"""
 	Save training results to tests/testname/
 	nodes: number of nodes use
-	precision: model precision value
+	value: value to write to file
 	testname: test being run. Defaults to 'none'
 	"""
  	try:
@@ -97,5 +97,5 @@ def log_file(nodes, precision, testname='none'):
 	f = open(filename, 'a')
 
 
-	f.write(str(precision)+',')
+	f.write(str(value)+',')
 	return
