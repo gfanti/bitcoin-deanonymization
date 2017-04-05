@@ -53,7 +53,8 @@ def inference(timestamps, hidden1_units, hidden2_units, adj_list):
     softmax_linear: Output tensor with the computed logits.
   """
   num_nodes = len(adj_list.keys())
-  if (num_nodes == hidden1_units):
+  cnn = (num_nodes == hidden1_units)
+  if (cnn):
       print('\trunning CNN...')
 
   # Hidden 1
@@ -61,13 +62,18 @@ def inference(timestamps, hidden1_units, hidden2_units, adj_list):
     print('Feature size', FEATURE_SIZE)
     print('hidden1_units', hidden1_units)
 
-    val = np.zeros((FEATURE_SIZE, hidden1_units))
-    # only neighbors are non-zero
-    if (num_nodes == hidden1_units):
-        for node in range(num_nodes):
-            neighbors = adj_list[node]
-            for v in neighbors:
-                val[node,v] = np.random.normal()
+    if (cnn):
+        val = np.zeros((FEATURE_SIZE, hidden1_units))
+        # only neighbors are non-zero
+        if (num_nodes == hidden1_units):
+            for node in range(num_nodes):
+                neighbors = adj_list[node]
+                for v in neighbors:
+                    val[node,v] = np.random.normal()
+    else:
+        val = tf.truncated_normal([FEATURE_SIZE, hidden1_units],
+                stddev=1.0 / math.sqrt(float(FEATURE_SIZE
+                    )))
 
     weights = tf.Variable(val
                         , name='weights',dtype=tf.float32)
