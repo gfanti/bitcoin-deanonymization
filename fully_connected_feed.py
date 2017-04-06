@@ -128,27 +128,29 @@ def run_training():
     filename = 'data/random_regular.gexf'	# 100 node random regular graph
     G = nx.read_gexf(filename)
 
-    # create adjacency list
     num_nodes = len(G.nodes())
+    cnn = (num_nodes == FLAGS.hidden1)
     adj_list = {}
+     
+    # create adjacency list
+    if (cnn):
+        for node in G.nodes():
+            adj_list[int(node)] = list(map(int, G.neighbors(node)))
 
-    for node in G.nodes():
-        adj_list[int(node)] = list(map(int, G.neighbors(node)))
-
-    # 0 mask for CNN
-    indices = []  # A list of coordinates to update.
-    updates = []   # A list of values corresponding to the respective
-                    # coordinate in indices.
-    for node in range(num_nodes):
-        neighbors = adj_list[node]
-        for v in range(num_nodes):
-            if v in neighbors:
-                pass
-            else:
-                # force nodes to 0
-                indices += [[node,v]]
-                updates += [0.0]
-    print('percentage of flattened nodes:', len(updates)/ (num_nodes*num_nodes))
+        # 0 mask for CNN
+        indices = []  # A list of coordinates to update.
+        updates = []   # A list of values corresponding to the respective
+                        # coordinate in indices.
+        for node in range(num_nodes):
+            neighbors = adj_list[node]
+            for v in range(num_nodes):
+                if v in neighbors:
+                    pass
+                else:
+                    # force nodes to 0
+                    indices += [[node,v]]
+                    updates += [0.0]
+        print('percentage of flattened nodes:', len(updates)/ (num_nodes*num_nodes))
     # Build a Graph that computes predictions from the inference model.
     logits = network_setup.inference(features_placeholder,
                              FLAGS.hidden1,
@@ -210,9 +212,10 @@ def run_training():
                                feed_dict=feed_dict)
 
         # CNN property: modfy weights to 0
-        weights = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope="hidden1")[0]
-        weights = tf.scatter_nd_update(weights,indices, updates)
-        # print(weights.eval(session=sess))
+        if (cnn):
+            weights = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope="hidden1")[0]
+            weights = tf.scatter_nd_update(weights,indices, updates)
+            # print(weights.eval(session=sess))
         duration = time.time() - start_time
 
         # Write the summaries and print an overview fairly often.
