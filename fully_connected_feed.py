@@ -131,7 +131,7 @@ def run_training():
     num_nodes = len(G.nodes())
     cnn = (num_nodes == FLAGS.hidden1)
     adj_list = {}
-     
+
     # create adjacency list
     if (cnn):
         for node in G.nodes():
@@ -194,6 +194,13 @@ def run_training():
       saver.restore(sess, latest_checkpoint)
       print("Model restored.")
 
+    # the length of each feature
+    num_datapoints = str(300000+(int(FLAGS.runs)-1)*50000)
+
+    # open files to log
+    log_file_init(FLAGS.testname, num_datapoints)
+    log_file_init(FLAGS.testname + 'loss', num_datapoints)
+
     # Start the training loop.
     for step in xrange(FLAGS.max_steps):
         start_time = time.time()
@@ -222,7 +229,7 @@ def run_training():
         if step % 100 == 0:
             # Print status to stdout.
             print('Step %d: loss = %.2f (%.3f sec)' % (step, loss_value, duration))
-            log_file(str(300000+(int(FLAGS.runs)-1)*50000), loss_value, testname=FLAGS.testname + 'loss')
+            log_file(num_datapoints, loss_value, testname=FLAGS.testname + 'loss')
             # Update the events file.
             summary_str = sess.run(summary, feed_dict=feed_dict)
             summary_writer.add_summary(summary_str, step)
@@ -239,7 +246,7 @@ def run_training():
                     labels_placeholder,
                     data_sets.train)
 
-            log_file(str(300000+(int(FLAGS.runs)-1)*50000), precision, testname=FLAGS.testname)
+            log_file(num_datapoints, precision, testname=FLAGS.testname)
             # Evaluate against the validation set.
             print('Validation Data Eval:')
             precision =do_eval(sess,
@@ -247,7 +254,7 @@ def run_training():
                     features_placeholder,
                     labels_placeholder,
                     data_sets.validation)
-            log_file(str(300000+(int(FLAGS.runs)-1)*50000), precision, testname=FLAGS.testname)
+            log_file(num_datapoints, precision, testname=FLAGS.testname)
             # Evaluate against the test set.
             print('Test Data Eval:')
             precision = do_eval(sess,
@@ -255,7 +262,7 @@ def run_training():
                     features_placeholder,
                     labels_placeholder,
                     data_sets.test)
-            log_file(str(300000+(int(FLAGS.runs)-1)*50000), precision, testname=FLAGS.testname)
+            log_file(num_datapoints, precision, testname=FLAGS.testname)
 
 
 def main(_):

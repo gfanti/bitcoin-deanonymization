@@ -71,6 +71,19 @@ def parse_arguments():
 	print 'num trials: ', args.trials, '\n'
 	return args
 
+def log_file_init(testname, n):
+	"""
+	testname: test being run. subfolder name in tests/
+	n : number of datapoints. currently starts at 300k with 50k increments
+	"""
+	# if file exists, delete it
+	file_path = os.path.join(os.path.dirname(__file__),
+					'tests', testname, testname + '_' + n +
+					'.csv')
+	os.remove(file_path)
+	return
+
+	return
 def log_file(nodes, value, testname='none'):
 	"""
 	Save training results to tests/testname/
