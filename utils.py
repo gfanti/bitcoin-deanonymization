@@ -80,10 +80,10 @@ def log_file_init(testname, n):
 	file_path = os.path.join(os.path.dirname(__file__),
 					'tests', testname, testname + '_' + n +
 					'.csv')
-	os.remove(file_path)
+	try: os.remove(file_path)
+	except OSError: pass
 	return
 
-	return
 def log_file(nodes, value, testname='none'):
 	"""
 	Save training results to tests/testname/

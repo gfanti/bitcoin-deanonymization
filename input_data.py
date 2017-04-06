@@ -169,43 +169,78 @@ def read_data_sets(train_dir,
   train_labels = None
   test_features = None
   test_labels = None
-  for run in runs:
-    print(run)
-    run_prefix = 'run' + str(run) + '_'
-    local_file = os.path.join(os.path.dirname(__file__), train_dir, run_prefix + TRAIN_FEATURES)
-    with open(local_file, 'rb') as f:
-      if train_features is None:
-        train_features = extract_features(f)
-      else:
-        train_features = np.concatenate((train_features, extract_features(f)))
 
-    local_file = os.path.join(os.path.dirname(__file__), train_dir, run_prefix + TRAIN_LABELS)
-    with open(local_file, 'rb') as f:
-      if train_labels is None:
-        train_labels = extract_labels(f, one_hot=one_hot)
-      else:
-        train_labels = np.concatenate((train_labels, extract_labels(f, one_hot=one_hot)))
+  if (runs[0] == -1):
+      print('DEBUG MODE')
+      # training
+      train_dir += '/debug_set'
+      run_prefix = 'debug' + '_'
+      local_file = os.path.join(os.path.dirname(__file__), train_dir, run_prefix + TRAIN_FEATURES)
+      with open(local_file, 'rb') as f:
+        if train_features is None:
+          train_features = extract_features(f)
+        else:
+          train_features = np.concatenate((train_features, extract_features(f)))
 
+      local_file = os.path.join(os.path.dirname(__file__), train_dir, run_prefix + TRAIN_LABELS)
+      with open(local_file, 'rb') as f:
+        if train_labels is None:
+          train_labels = extract_labels(f, one_hot=one_hot)
+        else:
+          train_labels = np.concatenate((train_labels, extract_labels(f, one_hot=one_hot)))
 
-
-    # Testing
-    local_file = os.path.join(os.path.dirname(__file__), train_dir, run_prefix + TEST_FEATURES)
-    with open(local_file, 'rb') as f:
-      if test_features is None:
-        test_features = extract_features(f)
-      else:
-        test_features = np.concatenate((test_features, extract_features(f)))
-
-
-    local_file = os.path.join(os.path.dirname(__file__), train_dir, run_prefix + TEST_LABELS)
-    with open(local_file, 'rb') as f:
-      if test_labels is None:
-        test_labels = extract_labels(f, one_hot=one_hot)
-      else:
-        test_labels = np.concatenate((test_labels, extract_labels(f, one_hot=one_hot)))
+      # Testing
+      local_file = os.path.join(os.path.dirname(__file__), train_dir, run_prefix + TEST_FEATURES)
+      with open(local_file, 'rb') as f:
+        if test_features is None:
+          test_features = extract_features(f)
+        else:
+          test_features = np.concatenate((test_features, extract_features(f)))
 
 
-  # Remove features that are not well-formed (ie not all timestamps are collected)  
+      local_file = os.path.join(os.path.dirname(__file__), train_dir, run_prefix + TEST_LABELS)
+      with open(local_file, 'rb') as f:
+        if test_labels is None:
+          test_labels = extract_labels(f, one_hot=one_hot)
+        else:
+          test_labels = np.concatenate((test_labels, extract_labels(f, one_hot=one_hot)))
+  else:
+      for run in runs:
+        print(run)
+        # training
+        run_prefix = 'run' + str(run) + '_'
+        local_file = os.path.join(os.path.dirname(__file__), train_dir, run_prefix + TRAIN_FEATURES)
+        with open(local_file, 'rb') as f:
+          if train_features is None:
+            train_features = extract_features(f)
+          else:
+            train_features = np.concatenate((train_features, extract_features(f)))
+
+        local_file = os.path.join(os.path.dirname(__file__), train_dir, run_prefix + TRAIN_LABELS)
+        with open(local_file, 'rb') as f:
+          if train_labels is None:
+            train_labels = extract_labels(f, one_hot=one_hot)
+          else:
+            train_labels = np.concatenate((train_labels, extract_labels(f, one_hot=one_hot)))
+
+        # Testing
+        local_file = os.path.join(os.path.dirname(__file__), train_dir, run_prefix + TEST_FEATURES)
+        with open(local_file, 'rb') as f:
+          if test_features is None:
+            test_features = extract_features(f)
+          else:
+            test_features = np.concatenate((test_features, extract_features(f)))
+
+
+        local_file = os.path.join(os.path.dirname(__file__), train_dir, run_prefix + TEST_LABELS)
+        with open(local_file, 'rb') as f:
+          if test_labels is None:
+            test_labels = extract_labels(f, one_hot=one_hot)
+          else:
+            test_labels = np.concatenate((test_labels, extract_labels(f, one_hot=one_hot)))
+
+
+  # Remove features that are not well-formed (ie not all timestamps are collected)
   train_features, train_labels = remove_incompletes(train_features, train_labels)
   test_features, test_labels = remove_incompletes(test_features, test_labels)
 

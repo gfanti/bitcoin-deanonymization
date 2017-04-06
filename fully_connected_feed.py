@@ -335,22 +335,32 @@ if __name__ == '__main__':
       help='specify testname to save in appropriate tests/ subfolder',
   )
 
+  parser.add_argument(
+      '--debug',
+      default=False,
+      help='use small debug training set (50k) in data/debug/',
+  )
+
 
   FLAGS, unparsed = parser.parse_known_args()
 
-  # append more runs
-  for run in range(1,int(FLAGS.runs)+1):
-	if (run > 1):
-		RUNS += [run]
+  if (FLAGS.debug):
+      RUNS = [-1]
+      LOG_DIR = os.path.join(LOG_DIR, 'runs_debug')
+  else:
+      # append more runs
+      for run in range(1,int(FLAGS.runs)+1):
+    	if (run > 1):
+    		RUNS += [run]
 
-  # private log directory
-  LOG_DIR = os.path.join(LOG_DIR, 'runs'+str(RUNS[-1]))
-  print(LOG_DIR)
+      # private log directory
+      LOG_DIR = os.path.join(LOG_DIR, 'runs'+str(RUNS[-1]))
+      
   try:
     os.mkdir(LOG_DIR)
-    print('made at' + LOG_DIR)
+    print('logs dir made at' + LOG_DIR)
   except OSError:
-    print('error making dir')
+    print('error making dir. dir could already exist')
 
   print('Hidden 1:', FLAGS.hidden1, 'nodes')
   print('Hidden 2:', FLAGS.hidden2, 'nodes')
