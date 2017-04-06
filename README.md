@@ -63,6 +63,7 @@ Notable files
 					  		layer
 		--testname			(str) specify testname to save in appropriate
 					  		`tests/` subfolder
+		-- debug			(bool) set to `True` to use debug set
 
 ---
 
