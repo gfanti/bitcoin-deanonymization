@@ -6,3 +6,4 @@ Apr Wk 2
 - TODO vary batch size
 - TODO hid2 to have 100 units and same architecture as hid1
 - visualize graph
+- organize `LOG_DIR` to be in subfolders based on `testname/`
