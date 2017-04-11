@@ -5,8 +5,6 @@
 # You may obtain a copy of the License at
 #
 #     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
@@ -33,14 +31,16 @@ import numpy as np
 import tensorflow as tf
 
 # The Random regular graph dataset has 100 classes, representing the 100 candidate sources
-NUM_CLASSES = 100
+# NUM_CLASSES = 100
+NUM_CLASSES = 10
 # # The 5-regular tree graph dataset has 341 classes
 # NUM_CLASSES = 341
 # # The 4-regular tree graph dataset has 364 classes
 # NUM_CLASSES = 364
 
-# The MNIST images are always 28x28 pixels.
-FEATURE_SIZE = NUM_CLASSES
+FEATURE_SIZE = 100
+
+labels_map = []
 
 def inference(timestamps, hidden1_units, hidden2_units, adj_list):
   """Build the model up to where it may be used for inference.
@@ -111,7 +111,7 @@ def loss(logits, labels):
   Returns:
     loss: Loss tensor of type float.
   """
-  labels = tf.to_int64(labels)
+  # labels = tf.to_int64(labels)
   cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(
       labels=labels, logits=logits, name='xentropy')
   return tf.reduce_mean(cross_entropy, name='xentropy_mean')
