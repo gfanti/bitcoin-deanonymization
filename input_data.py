@@ -241,8 +241,8 @@ def read_data_sets(train_dir,
 
 
   # Remove features that are not well-formed (ie not all timestamps are collected)
-  train_features, train_labels = remove_incompletes(train_features, train_labels)
-  test_features, test_labels = remove_incompletes(test_features, test_labels)
+  # train_features, train_labels = remove_incompletes(train_features, train_labels)
+  # test_features, test_labels = remove_incompletes(test_features, test_labels)
 
   # # We'll use the first 200k items to avoid using too much memory and train faster
   # train_features = train_features[:200000]
@@ -269,4 +269,6 @@ def read_data_sets(train_dir,
                        reshape=reshape)
   test = DataSet(test_features, test_labels, dtype=dtype, reshape=reshape)
 
-  return base.Datasets(train=train, validation=validation, test=test)
+  n_data = validation.num_examples + train.num_examples
+
+  return n_data, base.Datasets(train=train, validation=validation, test=test)
