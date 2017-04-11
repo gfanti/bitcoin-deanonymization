@@ -74,7 +74,7 @@ def parse_arguments():
 def log_file_init(testname, n):
 	"""
 	testname: test being run. subfolder name in tests/
-	n : number of datapoints. currently starts at 300k with 50k increments
+	n : number of datapoints (str)
 	"""
 	# if file exists, delete it
 	file_path = os.path.join(os.path.dirname(__file__),
@@ -108,7 +108,5 @@ def log_file(nodes, value, testname='none'):
 			str(nodes) + suffix)
 
 	f = open(filename, 'a')
-
-
 	f.write(str(value)+',')
 	return
