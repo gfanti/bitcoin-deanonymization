@@ -56,7 +56,7 @@ def placeholder_inputs(batch_size):
   # rather than the full size of the train or test data sets.
   features_placeholder = tf.placeholder(tf.float32, shape=(batch_size,
                                                        network_setup.FEATURE_SIZE))
-  labels_placeholder = tf.placeholder(tf.int32, shape=(batch_size))
+  labels_placeholder = tf.placeholder(tf.int32, shape=batch_size)
   return features_placeholder, labels_placeholder
 
 
@@ -116,7 +116,7 @@ def run_training():
   """Train network_setup for a number of steps."""
   # Get the sets of images and labels for training, validation, and
   # test on network_setup.
-  data_sets = input_data.read_data_sets(FLAGS.input_data_dir, runs = RUNS)
+  n_data, data_sets = input_data.read_data_sets(FLAGS.input_data_dir, runs = RUNS)
 
   # Tell TensorFlow that the model will be built into the default Graph.
   with tf.Graph().as_default():
@@ -150,7 +150,7 @@ def run_training():
                     # force nodes to 0
                     indices += [[node,v]]
                     updates += [0.0]
-        print('percentage of flattened nodes:', len(updates)/ (num_nodes*num_nodes))
+        print('node connectivity:{}'.format(1.0 - len(updates)/ (num_nodes*num_nodes)))
     # Build a Graph that computes predictions from the inference model.
     logits = network_setup.inference(features_placeholder,
                              FLAGS.hidden1,
@@ -179,6 +179,9 @@ def run_training():
     # Instantiate a SummaryWriter to output summaries and the Graph.
     summary_writer = tf.summary.FileWriter(LOG_DIR, sess.graph)
 
+    # the length of each feature
+    num_datapoints = str(n_data)
+
     if not FLAGS.restore:
       # Start a new training session
 
@@ -187,19 +190,18 @@ def run_training():
 
       # Run the Op to initialize the variables.
       sess.run(init)
+
+      # initialize clean log files
+      log_file_init(FLAGS.testname, num_datapoints)
+      log_file_init(FLAGS.testname + 'loss', num_datapoints)
+
     else:
       # Restore variables from disk.
       latest_checkpoint = tf.train.latest_checkpoint(LOG_DIR)
 
+      # Note: model must be present
       saver.restore(sess, latest_checkpoint)
-      print("Model restored.")
-
-    # the length of each feature
-    num_datapoints = str(300000+(int(FLAGS.runs)-1)*50000)
-
-    # open files to log
-    log_file_init(FLAGS.testname, num_datapoints)
-    log_file_init(FLAGS.testname + 'loss', num_datapoints)
+      print("Model restored from {}".format(LOG_DIR))
 
     # Start the training loop.
     for step in xrange(FLAGS.max_steps):
@@ -210,6 +212,7 @@ def run_training():
         feed_dict = fill_feed_dict(data_sets.train,
                                  features_placeholder,
                                  labels_placeholder)
+
         # Run one step of the model.  The return values are the activations
         # from the `train_op` (which is discarded) and the `loss` Op.  To
         # inspect the values of your Ops or variables, you may include them
@@ -238,7 +241,7 @@ def run_training():
         # Save a checkpoint and evaluate the model periodically.
         if (step + 1) % 1000 == 0 or (step + 1) == FLAGS.max_steps:
             # TODO commented out because creates error for cnn
-            # saver.save(sess, checkpoint_file, global_step=step)
+            saver.save(sess, checkpoint_file, global_step=step)
             # Evaluate against the training set.
             print('Training Data Eval:')
             precision = do_eval(sess,
@@ -345,6 +348,7 @@ if __name__ == '__main__':
 
   FLAGS, unparsed = parser.parse_known_args()
 
+
   if (FLAGS.debug):
       RUNS = [-1]
       LOG_DIR = os.path.join(LOG_DIR, 'runs_debug')
@@ -353,9 +357,9 @@ if __name__ == '__main__':
       for run in range(1,int(FLAGS.runs)+1):
     	if (run > 1):
     		RUNS += [run]
-
-      # private log directory
-      LOG_DIR = os.path.join(LOG_DIR, 'runs'+str(RUNS[-1]))
+      else:
+          # regular private log directory
+          LOG_DIR = os.path.join(LOG_DIR, FLAGS.testname, 'runs'+str(RUNS[-1]))
 
   try:
     os.mkdir(LOG_DIR)
