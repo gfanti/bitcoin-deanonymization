@@ -29,7 +29,7 @@ def _bytes_feature(value):
 
 
 def create_dataset(G, theta, trials, name, run = 1, regular_degree = None):
-	''' Creates a dataset by spreading over graph G. 
+	''' Creates a dataset by spreading over graph G.
 	Inputs:
 		G 		graph object
 		theta 	number of corrupt connections per node
@@ -50,14 +50,17 @@ def create_dataset(G, theta, trials, name, run = 1, regular_degree = None):
 	labels = []
 	# start_timescale = 10
 
+        if regular_degree is None:
+            nodes = G.nodes()
+        else:
+            nodes = [n for n in G.nodes() if G.degree(n) >= regular_degree]
+        # limit to two possibilites
+        candidates = [0,1,2,3,4,5,6,7,8,9]
+
 	num_nodes = nx.number_of_nodes(G)
 	for trial in tqdm(range(trials)):
-		if regular_degree is None:
-			nodes = G.nodes()
-		else:
-			nodes = [n for n in G.nodes() if G.degree(n) >= regular_degree]
-			
-		source = random.choice(nodes)
+
+		source = random.choice(candidates)
 
 		# Spread the message
 		G.spread_message(source, num_corrupt_cnx = theta)
@@ -91,7 +94,7 @@ if __name__ == '__main__':
 		regular_degree = 5
 	else:
 		regular_degree = None
-	
+
 	args = parse_arguments()
 
 	spreading_time = 20
@@ -113,7 +116,7 @@ if __name__ == '__main__':
 
 	# Convert to Examples and write the result to TFRecords.
 	print 'Creating training data'
-	create_dataset(G, theta, train_trials, 'train', run = run, regular_degree = regular_degree)
+	create_dataset(G, theta, train_trials, 'train', run = args.run, regular_degree = regular_degree)
 	# print 'Creating validation data'
 	# create_dataset(G, theta, validation_trials, 'validation', run = args.run)
 	print 'Creating test data'
