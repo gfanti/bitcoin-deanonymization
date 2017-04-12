@@ -201,10 +201,11 @@ def run_training():
 
       # Note: model must be present
       saver.restore(sess, latest_checkpoint)
+      last_step = int(latest_checkpoint.split('-')[-1])
       print("Model restored from {}".format(LOG_DIR))
 
     # Start the training loop.
-    for step in xrange(FLAGS.max_steps):
+    for step in xrange(last_step+1, FLAGS.max_steps):
         start_time = time.time()
 
         # Fill a feed dictionary with the actual set of images and labels
