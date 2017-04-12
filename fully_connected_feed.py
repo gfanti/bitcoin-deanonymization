@@ -181,7 +181,8 @@ def run_training():
 
     # the length of each feature
     num_datapoints = str(n_data)
-
+    last_step = -1
+    
     if not FLAGS.restore:
       # Start a new training session
 
