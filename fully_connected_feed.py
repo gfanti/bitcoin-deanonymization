@@ -225,7 +225,8 @@ def run_training():
         if (cnn):
             weights = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope="hidden1")[0]
             weights = tf.scatter_nd_update(weights,indices, updates)
-            # print(weights.eval(session=sess))
+            weights = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope="hidden2")[0]
+            weights = tf.scatter_nd_update(weights,indices, updates)
         duration = time.time() - start_time
 
         # Write the summaries and print an overview fairly often.

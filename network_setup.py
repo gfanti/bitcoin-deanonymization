@@ -31,7 +31,7 @@ import numpy as np
 import tensorflow as tf
 
 # The Random regular graph dataset has 100 classes, representing the 100 candidate sources
-# NUM_CLASSES = 100
+NUM_CLASSES = 100
 # NUM_CLASSES = 10
 # # The 5-regular tree graph dataset has 341 classes
 # NUM_CLASSES = 341
@@ -59,9 +59,6 @@ def inference(timestamps, hidden1_units, hidden2_units, adj_list):
 
   # Hidden 1
   with tf.name_scope('hidden1'):
-    print('Feature size', FEATURE_SIZE)
-    print('hidden1_units', hidden1_units)
-
     if (cnn):
         val = np.zeros((FEATURE_SIZE, hidden1_units))
         # only neighbors are non-zero
@@ -75,22 +72,29 @@ def inference(timestamps, hidden1_units, hidden2_units, adj_list):
                 stddev=1.0 / math.sqrt(float(FEATURE_SIZE
                     )))
 
-    weights = tf.Variable(val
-                        , name='weights',dtype=tf.float32)
-    print('input weights', weights)
-    biases = tf.Variable(tf.zeros([hidden1_units]),
-                         name='biases')
+    weights = tf.Variable(val, name='weights',dtype=tf.float32)
+    biases = tf.Variable(tf.zeros([hidden1_units]), name='biases')
     hidden1 = tf.nn.relu(tf.matmul(timestamps, weights) + biases)
 
   # Hidden 2
   with tf.name_scope('hidden2'):
-    weights = tf.Variable(
-        tf.truncated_normal([hidden1_units, hidden2_units],
-                            stddev=1.0 / math.sqrt(float(hidden1_units))),
-        name='weights')
-    biases = tf.Variable(tf.zeros([hidden2_units]),
-                         name='biases')
+    if (cnn):
+        val = np.zeros((hidden1_units, hidden2_units))
+        # only neighbors are non-zero
+        if (num_nodes == hidden2_units):
+            for node in range(num_nodes):
+                neighbors = adj_list[node]
+                for v in neighbors:
+                    val[node,v] = np.random.normal()
+    else:
+        val = tf.truncated_normal([hidden1_units, hidden2_units],
+                stddev=1.0 / math.sqrt(float(hidden1_units
+                    )))
+
+    weights = tf.Variable(val, name='weights', dtype=tf.float32)
+    biases = tf.Variable(tf.zeros([hidden2_units]), name='biases')
     hidden2 = tf.nn.relu(tf.matmul(hidden1, weights) + biases)
+
   # Linear
   with tf.name_scope('softmax_linear'):
     weights = tf.Variable(
