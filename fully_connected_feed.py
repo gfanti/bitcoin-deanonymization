@@ -25,6 +25,7 @@ import os
 import sys
 import time
 import networkx as nx
+import glob
 
 from six.moves import xrange  # pylint: disable=redefined-builtin
 import tensorflow as tf
@@ -170,7 +171,7 @@ def run_training():
     summary = tf.summary.merge_all()
 
     # Create a saver for writing training checkpoints.
-    saver = tf.train.Saver()
+    saver = tf.train.Saver(max_to_keep=1)
     checkpoint_file = os.path.join(LOG_DIR, 'model.ckpt')
 
     # Create a session for running Ops on the Graph.
@@ -182,7 +183,7 @@ def run_training():
     # the length of each feature
     num_datapoints = str(n_data)
     last_step = -1
-    
+
     if not FLAGS.restore:
       # Start a new training session
 
@@ -203,6 +204,14 @@ def run_training():
       # Note: model must be present
       saver.restore(sess, latest_checkpoint)
       last_step = int(latest_checkpoint.split('-')[-1])
+
+
+      # delete old models, but keep events file
+      for f in glob.glob(os.path.join(LOG_DIR,"model*")):
+          if (f.split('-')[1].split('.')[0] == str(last_step)):
+              continue
+          os.remove(f)
+
       print("Model restored from {}".format(LOG_DIR))
 
     # Start the training loop.
