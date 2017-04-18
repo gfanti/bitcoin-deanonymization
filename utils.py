@@ -45,6 +45,8 @@ def parse_arguments():
 	parser = argparse.ArgumentParser()
 	parser.add_argument("-r", "--run", type=int,
 	                    help="changes the filename of saved data")
+	parser.add_argument("-f", "--filename", type=str, default = 'random_regular.gexf',
+	                    help="graph to be loaded")
 	parser.add_argument("-v", "--verbose", help="increase output verbosity",
 	                    action="store_true")
 	parser.add_argument("-w", "--write", help="writes the results to file",
@@ -69,6 +71,7 @@ def parse_arguments():
 	print 'estimators: ', args.estimators
 	print 'run: ', args.run
 	print 'num trials: ', args.trials, '\n'
+	print 'graph name: ', args.filename, '\n'
 	return args
 
 def log_file_init(testname, n):

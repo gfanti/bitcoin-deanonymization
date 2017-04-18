@@ -11,5 +11,7 @@ Apr Wk 2
 Apr Wk 3
 ***********
 - TODO debug cnn `ResourceExhaustedError` by reducing number of nodes
+- graph name now a parameter to `fully_connected_feed.py`
 - compare accuracy using first spy estimate
-    - modify plot function to read in features and return index of lowest.
+    - TODO modify plot function to read in features and return index of lowest.
+- `data/` folder now sub-categorized to different graph constructions

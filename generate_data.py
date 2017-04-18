@@ -40,9 +40,15 @@ def create_dataset(G, theta, trials, name, run = 1, regular_degree = None):
 	'''
 
 	run_prefix = 'run' + str(run) + '_'
-	filename = os.path.join('data/', run_prefix + name)
+	num_nodes = str(len(G.nodes()))
+	try:
+		os.mkdir(os.path.join('data',num_nodes+'_nodes'))
+	except OSError:
+		print('dir exists')
+
+	filename = os.path.join('data', num_nodes+'_nodes', run_prefix + name)
 	# filename = os.path.join('data/' + name + str(run))
-	label_filename = os.path.join('data/' + run_prefix + name + '_labels')
+	label_filename = os.path.join('data', num_nodes+'_nodes', run_prefix + name + '_labels')
 	print('Writing', filename)
 	# writer = tf.python_io.TFRecordWriter(filename)
 
@@ -86,16 +92,16 @@ if __name__ == '__main__':
 	# filename = 'data/bitcoin.gexf'		# Bitcoin snapshot graph
 	# filename = 'data/tree_4.gexf'	# 100 node random regular graph
 	# filename = 'data/tree_5.gexf'	# 100 node random regular graph
-	filename = 'data/random_regular.gexf'	# 100 node random regular graph
+	# filename = 'data/random_regular.gexf'	# 100 node random regular graph
 
-	if filename == 'data/tree_4.gexf':
+	args = parse_arguments()
+
+	if args.filename == 'tree_4.gexf':
 		regular_degree = 4
-	elif filename == 'data/tree_5.gexf':
+	elif args.filename == 'tree_5.gexf':
 		regular_degree = 5
 	else:
 		regular_degree = None
-
-	args = parse_arguments()
 
 	spreading_time = 20
 	SM = ['trickle','diffusion']
@@ -103,13 +109,14 @@ if __name__ == '__main__':
 	print 'Generating', SM[args.spreading] ,'Graph...'
 	print 'run number #', args.run ,'...'
 
+	filepath = os.path.join('data',args.filename)
 	if (args.spreading == 0):
 		# trickle
-		G = DataGraphTrickle(filename, spreading_time = spreading_time)
+		G = DataGraphTrickle(filepath, spreading_time = spreading_time)
 
 	elif (args.spreading == 1):
 		# diffusion
-		G = DataGraphDiffusion(filename, spreading_time = spreading_time)
+		G = DataGraphDiffusion(filepath, spreading_time = spreading_time)
 
 	train_trials = args.trials # We'll separate out the validation set later
 	test_trials = train_trials / 10
