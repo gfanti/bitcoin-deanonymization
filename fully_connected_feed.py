@@ -215,6 +215,11 @@ def run_training():
 
       print("Model restored from {}".format(LOG_DIR))
 
+      weights1 = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope="hidden1")[0]
+      update_weights_hid1 = tf.scatter_nd_update(weights1,indices, updates)
+      weights2 = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope="hidden2")[0]
+      update_weights_hid2 = tf.scatter_nd_update(weights2,indices, updates)
+
     # Start the training loop.
     for step in xrange(last_step+1, FLAGS.max_steps):
         start_time = time.time()
@@ -235,10 +240,10 @@ def run_training():
 
         # CNN property: modfy weights to 0
         if (cnn):
-            weights = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope="hidden1")[0]
-            updated_weights = tf.scatter_nd_update(weights,indices, updates)
-            weights = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope="hidden2")[0]
-            weights = tf.scatter_nd_update(weights,indices, updates)
+            sess.run(update_weights_hid1)
+            weights1 = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope="hidden1")[0]
+            # print(weights1.eval(session=sess))
+            sess.run(update_weights_hid2)
         duration = time.time() - start_time
 
         # Write the summaries and print an overview fairly often.
