@@ -259,7 +259,7 @@ def run_training():
         # Save a checkpoint and evaluate the model periodically.
         if (step + 1) % 1000 == 0 or (step + 1) == FLAGS.max_steps:
             # TODO commented out because creates error for cnn
-            # saver.save(sess, checkpoint_file, global_step=step)
+            saver.save(sess, checkpoint_file, global_step=step)
             # Evaluate against the training set.
             print('Training Data Eval:')
             precision = do_eval(sess,
