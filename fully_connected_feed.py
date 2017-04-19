@@ -126,10 +126,11 @@ def run_training():
         FLAGS.batch_size)
 
     # open up graph to understand graph structure
-    filename = 'data/random_regular.gexf'	# 100 node random regular graph
+    filename = os.path.join('data',FLAGS.graph_name)
     G = nx.read_gexf(filename)
 
     num_nodes = len(G.nodes())
+    print(num_nodes)
     cnn = (num_nodes == FLAGS.hidden1)
     adj_list = {}
 
@@ -214,6 +215,11 @@ def run_training():
 
       print("Model restored from {}".format(LOG_DIR))
 
+      weights1 = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope="hidden1")[0]
+      update_weights_hid1 = tf.scatter_nd_update(weights1,indices, updates)
+      weights2 = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope="hidden2")[0]
+      update_weights_hid2 = tf.scatter_nd_update(weights2,indices, updates)
+
     # Start the training loop.
     for step in xrange(last_step+1, FLAGS.max_steps):
         start_time = time.time()
@@ -234,10 +240,10 @@ def run_training():
 
         # CNN property: modfy weights to 0
         if (cnn):
-            weights = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope="hidden1")[0]
-            weights = tf.scatter_nd_update(weights,indices, updates)
-            weights = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope="hidden2")[0]
-            weights = tf.scatter_nd_update(weights,indices, updates)
+            sess.run(update_weights_hid1)
+            weights1 = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope="hidden1")[0]
+            # print(weights1.eval(session=sess))
+            sess.run(update_weights_hid2)
         duration = time.time() - start_time
 
         # Write the summaries and print an overview fairly often.
@@ -298,9 +304,15 @@ if __name__ == '__main__':
       help='Initial learning rate.'
   )
   parser.add_argument(
+      '--graph_name',
+      type=str,
+      default='random_regular.gexf',
+      help='file name in data/ folder'
+  )
+  parser.add_argument(
       '--max_steps',
       type=int,
-      default=2000,
+      default=300000,
       help='Number of steps to run trainer.'
   )
   parser.add_argument(
@@ -348,7 +360,7 @@ if __name__ == '__main__':
   parser.add_argument(
       '--testname',
       default='unknown-test',
-      help='specify testname to save in appropriate tests/ subfolder',
+      help='specify testname to save in appropriate tests/<graph_name> subfolder',
   )
 
   parser.add_argument(
@@ -371,7 +383,7 @@ if __name__ == '__main__':
     		RUNS += [run]
       else:
           # regular private log directory
-          LOG_DIR = os.path.join(LOG_DIR, FLAGS.testname, 'runs'+str(RUNS[-1]))
+          LOG_DIR = os.path.join(LOG_DIR, FLAGS.graph_name, FLAGS.testname, 'runs'+str(RUNS[-1]))
 
   try:
     os.mkdir(LOG_DIR)
@@ -384,4 +396,6 @@ if __name__ == '__main__':
   print('batch size:', FLAGS.batch_size)
   print('runs:', FLAGS.runs)
   print('log_dir:', LOG_DIR)
+  print('max_steps:', FLAGS.max_steps)
+  print('filename:', FLAGS.graph_name)
   tf.app.run(main=main, argv=[sys.argv[0]] + unparsed)
