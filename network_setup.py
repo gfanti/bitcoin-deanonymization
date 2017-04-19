@@ -30,15 +30,15 @@ import numpy as np
 
 import tensorflow as tf
 
-# The Random regular graph dataset has 100 classes, representing the 100 candidate sources
-NUM_CLASSES = 10
+FEATURE_SIZE = 100
+
+NUM_CLASSES = FEATURE_SIZE
 # NUM_CLASSES = 10
 # # The 5-regular tree graph dataset has 341 classes
 # NUM_CLASSES = 341
 # # The 4-regular tree graph dataset has 364 classes
 # NUM_CLASSES = 364
 
-FEATURE_SIZE = 10
 
 labels_map = []
 
@@ -53,6 +53,7 @@ def inference(timestamps, hidden1_units, hidden2_units, adj_list):
     softmax_linear: Output tensor with the computed logits.
   """
   num_nodes = len(adj_list.keys())
+
   cnn = (num_nodes == hidden1_units)
   if (cnn):
       print('\trunning CNN...')

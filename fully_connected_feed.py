@@ -115,9 +115,15 @@ def do_eval(sess,
 
 def run_training():
   """Train network_setup for a number of steps."""
+
+  # open up graph to understand graph structure
+  filename = os.path.join('data',FLAGS.graph_name)
+  G = nx.read_gexf(filename)
+  num_nodes = len(G.nodes())
+
   # Get the sets of images and labels for training, validation, and
   # test on network_setup.
-  n_data, data_sets = input_data.read_data_sets(FLAGS.input_data_dir, runs = RUNS)
+  n_data, data_sets = input_data.read_data_sets(os.path.join(FLAGS.input_data_dir,str(num_nodes)+'_nodes'), runs = RUNS)
 
   # Tell TensorFlow that the model will be built into the default Graph.
   with tf.Graph().as_default():
@@ -125,12 +131,6 @@ def run_training():
     features_placeholder, labels_placeholder = placeholder_inputs(
         FLAGS.batch_size)
 
-    # open up graph to understand graph structure
-    filename = os.path.join('data',FLAGS.graph_name)
-    G = nx.read_gexf(filename)
-
-    num_nodes = len(G.nodes())
-    print(num_nodes)
     cnn = (num_nodes == FLAGS.hidden1)
     adj_list = {}
 
@@ -215,10 +215,10 @@ def run_training():
 
       print("Model restored from {}".format(LOG_DIR))
 
-      weights1 = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope="hidden1")[0]
-      update_weights_hid1 = tf.scatter_nd_update(weights1,indices, updates)
-      weights2 = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope="hidden2")[0]
-      update_weights_hid2 = tf.scatter_nd_update(weights2,indices, updates)
+    weights1 = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope="hidden1")[0]
+    update_weights_hid1 = tf.scatter_nd_update(weights1,indices, updates)
+    weights2 = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope="hidden2")[0]
+    update_weights_hid2 = tf.scatter_nd_update(weights2,indices, updates)
 
     # Start the training loop.
     for step in xrange(last_step+1, FLAGS.max_steps):
