@@ -42,76 +42,60 @@ RUNS = [1]
 LOG_DIR = 'logs'
 
 
-def placeholder_inputs(batch_size):
-  """Generate placeholder variables to represent the input tensors.
-  These placeholders are used as inputs by the rest of the model building
-  code and will be fed from the downloaded data in the .run() loop, below.
-  Args:
-    batch_size: The batch size will be baked into both placeholders.
-  Returns:
-    features_placeholder: Features placeholder.
-    labels_placeholder: Labels placeholder.
-  """
-  # Note that the shapes of the placeholders match the shapes of the full
-  # image and label tensors, except the first dimension is now batch_size
-  # rather than the full size of the train or test data sets.
-  features_placeholder = tf.placeholder(tf.float32, shape=(batch_size,
-                                                       network_setup.FEATURE_SIZE))
-  labels_placeholder = tf.placeholder(tf.int32, shape=batch_size)
-  return features_placeholder, labels_placeholder
-
-
 def fill_feed_dict(data_set, features_pl, labels_pl):
-  """Fills the feed_dict for training the given step.
-  A feed_dict takes the form of:
-  feed_dict = {
-      <placeholder>: <tensor of values to be passed for placeholder>,
-      ....
-  }
-  Args:
-    data_set: The set of features and labels, from input_data.read_data_sets()
-    features_pl: The features placeholder, from placeholder_inputs().
-    labels_pl: The labels placeholder, from placeholder_inputs().
-  Returns:
-    feed_dict: The feed dictionary mapping from placeholders to values.
-  """
-  # Create the feed_dict for the placeholders filled with the next
-  # `batch size` examples.
-  features_feed, labels_feed = data_set.next_batch(FLAGS.batch_size)
-  feed_dict = {
-      features_pl: features_feed,
-      labels_pl: labels_feed,
-  }
-  return feed_dict
+    """
+    Fills the feed_dict for training the given step.
+    A feed_dict takes the form of:
+    feed_dict = {
+        <placeholder>: <tensor of values to be passed for placeholder>,
+        ....
+    }
+    Args:
+        data_set: The set of features and labels, from input_data.read_data_sets()
+        features_pl: The features placeholder, from placeholder_inputs().
+        labels_pl: The labels placeholder, from placeholder_inputs().
+    Returns:
+        feed_dict: The feed dictionary mapping from placeholders to values.
+    """
+    # Create the feed_dict for the placeholders filled with the next
+    # `batch size` examples.
+    features_feed, labels_feed = data_set.next_batch(FLAGS.batch_size)
+
+    feed_dict = {
+        features_pl: features_feed,
+        labels_pl: labels_feed,
+    }
+    return feed_dict
 
 
 def do_eval(sess,
-            eval_correct,
+            acc_op,
             features_placeholder,
             labels_placeholder,
             data_set):
-  """Runs one evaluation against the full epoch of data.
-  Args:
-    sess: The session in which the model has been trained.
-    eval_correct: The Tensor that returns the number of correct predictions.
-    features_placeholder: The features placeholder.
-    labels_placeholder: The labels placeholder.
-    data_set: The set of features and labels to evaluate, from
-      input_data.read_data_sets().
-  """
-  # And run one epoch of eval.
-  true_count = 0  # Counts the number of correct predictions.
-  steps_per_epoch = data_set.num_examples // FLAGS.batch_size
-  num_examples = steps_per_epoch * FLAGS.batch_size
-  for step in xrange(steps_per_epoch):
-    feed_dict = fill_feed_dict(data_set,
+    """
+    Runs one evaluation against the full epoch of data.
+    Args:
+        sess: The session in which the model has been trained.
+        acc_op: The Tensor that returns the number of correct predictions.
+        features_placeholder: The features placeholder.
+            labels_placeholder: The labels placeholder.
+        data_set: The set of features and labels to evaluate, from
+            input_data.read_data_sets().
+    """
+    # And run one epoch of eval.
+    true_count = 0  # Counts the number of correct predictions.
+    steps_per_epoch = data_set.num_examples // FLAGS.batch_size
+    num_examples = steps_per_epoch * FLAGS.batch_size
+    for step in xrange(steps_per_epoch):
+        feed_dict = fill_feed_dict(data_set,
                                features_placeholder,
                                labels_placeholder)
-    true_count += sess.run(eval_correct, feed_dict=feed_dict)
-  precision = float(true_count) / num_examples
-  print('  Num examples: %d  Num correct: %d  Precision @ 1: %0.04f' %
-        (num_examples, true_count, precision))
-  return precision
+        true_count += sess.run(acc_op, feed_dict=feed_dict)
+    precision = float(true_count) / num_examples
+    print('  Num examples: %d  Num correct: %d  Precision @ 1: %0.04f' %
+            (num_examples, true_count, precision))
+    return precision
 
 def run_training():
   """Train network_setup for a number of steps."""
@@ -127,15 +111,18 @@ def run_training():
 
   # Tell TensorFlow that the model will be built into the default Graph.
   with tf.Graph().as_default():
-    # Generate placeholders for the images and labels.
-    features_placeholder, labels_placeholder = placeholder_inputs(
-        FLAGS.batch_size)
 
-    cnn = (num_nodes == FLAGS.hidden1)
+    # Generate placeholders for the input and labels.
+    features_placeholder = tf.placeholder(tf.float32,
+                           shape=[None, network_setup.FEATURE_SIZE])
+    labels_placeholder = tf.placeholder(tf.float32,
+                           shape=[None, network_setup.NUM_CLASSES])
+
+    cnn_flag = (num_nodes == FLAGS.hidden1)
     adj_list = {}
 
     # create adjacency list
-    if (cnn):
+    if (cnn_flag):
         for node in G.nodes():
             adj_list[int(node)] = list(map(int, G.neighbors(node)))
 
@@ -153,6 +140,11 @@ def run_training():
                     indices += [[node,v]]
                     updates += [0.0]
         print('node connectivity:{}'.format(1.0 - len(updates)/ (num_nodes*num_nodes)))
+
+    ############################
+    #### BUILDING THE MODEL ####
+    ############################
+
     # Build a Graph that computes predictions from the inference model.
     logits = network_setup.inference(features_placeholder,
                              FLAGS.hidden1,
@@ -160,20 +152,25 @@ def run_training():
                              adj_list)
 
     # Add to the Graph the Ops for loss calculation.
-    loss = network_setup.loss(logits, labels_placeholder)
+    loss_op = network_setup.loss(logits, labels_placeholder)
 
     # Add to the Graph the Ops that calculate and apply gradients.
-    train_op = network_setup.training(loss, FLAGS.learning_rate)
+    train_op = network_setup.training(loss_op, FLAGS.learning_rate)
 
     # Add the Op to compare the logits to the labels during evaluation.
-    eval_correct = network_setup.evaluation(logits, labels_placeholder)
+    acc_op = network_setup.evaluation(logits, labels_placeholder)
 
     # Build the summary Tensor based on the TF collection of Summaries.
-    summary = tf.summary.merge_all()
+    merged_summary = tf.summary.merge_all()
 
     # Create a saver for writing training checkpoints.
     saver = tf.train.Saver(max_to_keep=1)
     checkpoint_file = os.path.join(LOG_DIR, 'model.ckpt')
+
+
+    #############################
+    #### PREPARING THE MODEL ####
+    #############################
 
     # Create a session for running Ops on the Graph.
     sess = tf.Session()
@@ -215,76 +212,89 @@ def run_training():
 
       print("Model restored from {}".format(LOG_DIR))
 
-    weights1 = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope="hidden1")[0]
-    update_weights_hid1 = tf.scatter_nd_update(weights1,indices, updates)
-    weights2 = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope="hidden2")[0]
-    update_weights_hid2 = tf.scatter_nd_update(weights2,indices, updates)
+    if (cnn_flag):
+        weights1 = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope="hidden1")[0]
+        update_weights_hid1 = tf.scatter_nd_update(weights1,indices, updates)
+        weights2 = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope="hidden2")[0]
+        update_weights_hid2 = tf.scatter_nd_update(weights2,indices, updates)
 
-    # Start the training loop.
+
+    ###########################
+    #### RUNNING THE MODEL ####
+    ###########################
+
+    # test data dictionary for evaluation
+    # computes over all test data
+    whole_train_data = {
+        features_placeholder: data_sets.train._features,
+        labels_placeholder: data_sets.train._labels,
+    }
+
     for step in xrange(last_step+1, FLAGS.max_steps):
         start_time = time.time()
 
         # Fill a feed dictionary with the actual set of images and labels
+        # of the next batch
         # for this particular training step.
-        feed_dict = fill_feed_dict(data_sets.train,
+        train_data = fill_feed_dict(data_sets.train,
                                  features_placeholder,
                                  labels_placeholder)
 
-        # Run one step of the model.  The return values are the activations
-        # from the `train_op` (which is discarded) and the `loss` Op.  To
-        # inspect the values of your Ops or variables, you may include them
-        # in the list passed to sess.run() and the value tensors will be
-        # returned in the tuple from the call.
-        _, loss_value = sess.run([train_op, loss],
-                               feed_dict=feed_dict)
+        # Run one step of the model.
+        # The return values are the activations
+        # from the `train_op` (which is discarded)
+        _, l, a = sess.run([train_op, loss_op, acc_op], feed_dict=train_data)
 
         # CNN property: modfy weights to 0
-        if (cnn):
+        if (cnn_flag):
             sess.run(update_weights_hid1)
-            weights1 = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope="hidden1")[0]
-            # print(weights1.eval(session=sess))
             sess.run(update_weights_hid2)
+            # to inspect weights
+            #weights1 = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope="hidden1")[0]
+            # print(weights1.eval(session=sess))
         duration = time.time() - start_time
 
         # Write the summaries and print an overview fairly often.
         if step % 100 == 0:
+            # method to evaluate a tensor
+            # print( acc_op.eval(session=sess, feed_dict=train_data))
             # Print status to stdout.
-            print('Step %d: loss = %.2f (%.3f sec)' % (step, loss_value, duration))
-            log_file(num_datapoints, loss_value, testname=FLAGS.testname + 'loss')
+            print('Step %d: loss = %.2f, batch acc = %.2f (%.3f sec)' % (step, l, a, duration))
+            log_file(num_datapoints, l, testname=FLAGS.testname + 'loss')
             # Update the events file.
-            summary_str = sess.run(summary, feed_dict=feed_dict)
-            summary_writer.add_summary(summary_str, step)
+            s = sess.run(merged_summary, feed_dict=train_data)
+            summary_writer.add_summary(s, step)
             summary_writer.flush()
 
         # Save a checkpoint and evaluate the model periodically.
         if (step + 1) % 1000 == 0 or (step + 1) == FLAGS.max_steps:
-            # TODO commented out because creates error for cnn
             saver.save(sess, checkpoint_file, global_step=step)
-            # Evaluate against the training set.
-            print('Training Data Eval:')
             precision = do_eval(sess,
-                    eval_correct,
+                    acc_op,
                     features_placeholder,
                     labels_placeholder,
                     data_sets.train)
+            # Add a scalar summary for the snapshot loss.
+            log_file(num_datapoints, precision, testname=FLAGS.testname)
 
-            log_file(num_datapoints, precision, testname=FLAGS.testname)
-            # Evaluate against the validation set.
-            print('Validation Data Eval:')
-            precision =do_eval(sess,
-                    eval_correct,
-                    features_placeholder,
-                    labels_placeholder,
-                    data_sets.validation)
-            log_file(num_datapoints, precision, testname=FLAGS.testname)
-            # Evaluate against the test set.
-            print('Test Data Eval:')
-            precision = do_eval(sess,
-                    eval_correct,
-                    features_placeholder,
-                    labels_placeholder,
-                    data_sets.test)
-            log_file(num_datapoints, precision, testname=FLAGS.testname)
+            # # Evaluate against the validation set.
+            # print('Validation Data Eval:')
+            # precision =do_eval(sess,
+            #         acc_op,
+            #         features_placeholder,
+            #         labels_placeholder,
+            #         data_sets.validation)
+            # log_file(num_datapoints, precision, testname=FLAGS.testname)
+            #
+            # # Evaluate against the test set.
+            # print('Test Data Eval:')
+            # precision = do_eval(sess,
+            #         acc_op,
+            #         features_placeholder,
+            #         labels_placeholder,
+            #         data_sets.test)
+            # # Add a scalar summary for the snapshot loss.
+            # log_file(num_datapoints, precision, testname=FLAGS.testname)
 
 
 def main(_):
@@ -300,7 +310,7 @@ if __name__ == '__main__':
   parser.add_argument(
       '--learning_rate',
       type=float,
-      default=0.01,
+      default=0.003,
       help='Initial learning rate.'
   )
   parser.add_argument(
@@ -391,6 +401,8 @@ if __name__ == '__main__':
   except OSError:
     print('error making dir. dir could already exist')
 
+  print('-----------------')
+  print('Learning rate:', FLAGS.learning_rate)
   print('Hidden 1:', FLAGS.hidden1, 'nodes')
   print('Hidden 2:', FLAGS.hidden2, 'nodes')
   print('batch size:', FLAGS.batch_size)

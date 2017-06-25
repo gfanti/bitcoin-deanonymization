@@ -30,17 +30,51 @@ import numpy as np
 
 import tensorflow as tf
 
+# number of timestamps
 FEATURE_SIZE = 100
 
-NUM_CLASSES = FEATURE_SIZE
-# NUM_CLASSES = 10
-# # The 5-regular tree graph dataset has 341 classes
-# NUM_CLASSES = 341
-# # The 4-regular tree graph dataset has 364 classes
-# NUM_CLASSES = 364
-
+# number of possible sources
+NUM_CLASSES = 100
 
 labels_map = []
+
+def conv_layer(input, channels_in, channels_out, cnn_flag, adj_list, name):
+    with tf.name_scope(name):
+      if (cnn_flag):
+          val = np.zeros((channels_in, channels_out))
+          # only neighbors are non-zero
+          for node in range(channels_in):
+              neighbors = adj_list[node]
+              for v in neighbors:
+                  val[node,v] = np.random.normal()
+      else:
+          val = tf.truncated_normal([channels_in, channels_out],
+                  stddev=1.0 / math.sqrt(float(channels_in)))
+
+      w = tf.Variable(val, dtype=tf.float32, name='weights')
+      b = tf.Variable(tf.constant(0.1, shape=[channels_out]), name='biases')
+      act = tf.nn.relu(tf.matmul(input, w) + b)
+
+      tf.summary.histogram("weights", w)
+      tf.summary.histogram("biases", b)
+      tf.summary.histogram("activation", act)
+
+      return act
+
+def fc_layer(input, channels_in, channels_out, name="fc"):
+    with tf.name_scope(name):
+        w = tf.Variable(
+            tf.truncated_normal([channels_in, channels_out],
+                                stddev=1.0 / math.sqrt(float(channels_in))),
+            name='weights')
+        b = tf.Variable(tf.constant(0.1, shape=[channels_out]), name='biases')
+        act = tf.nn.relu(tf.matmul(input, w) + b)
+
+        tf.summary.histogram("weights", w)
+        tf.summary.histogram("biases", b)
+        tf.summary.histogram("activation", act)
+    return act
+    # return tf.nn.relu(tf.matmul(input, w) + b)
 
 def inference(timestamps, hidden1_units, hidden2_units, adj_list):
   """Build the model up to where it may be used for inference.
@@ -54,57 +88,26 @@ def inference(timestamps, hidden1_units, hidden2_units, adj_list):
   """
   num_nodes = len(adj_list.keys())
 
-  cnn = (num_nodes == hidden1_units)
-  if (cnn):
+  # hack for additional 2 hidden layers (totalling 4)
+  hidden3_units = 100
+  hidden4_units = 100
+
+  cnn_flag = (num_nodes == hidden1_units)
+  if (cnn_flag):
       print('\trunning CNN...')
 
   # Hidden 1
-  with tf.name_scope('hidden1'):
-    if (cnn):
-        val = np.zeros((FEATURE_SIZE, hidden1_units))
-        # only neighbors are non-zero
-        if (num_nodes == hidden1_units):
-            for node in range(num_nodes):
-                neighbors = adj_list[node]
-                for v in neighbors:
-                    val[node,v] = np.random.normal()
-    else:
-        val = tf.truncated_normal([FEATURE_SIZE, hidden1_units],
-                stddev=1.0 / math.sqrt(float(FEATURE_SIZE
-                    )))
-
-    weights = tf.Variable(val, name='weights',dtype=tf.float32)
-    biases = tf.Variable(tf.zeros([hidden1_units]), name='biases')
-    hidden1 = tf.nn.relu(tf.matmul(timestamps, weights) + biases)
-
+  hidden1 = conv_layer(timestamps, FEATURE_SIZE, hidden1_units, cnn_flag, adj_list, "hidden1")
   # Hidden 2
-  with tf.name_scope('hidden2'):
-    if (cnn):
-        val = np.zeros((hidden1_units, hidden2_units))
-        # only neighbors are non-zero
-        if (num_nodes == hidden2_units):
-            for node in range(num_nodes):
-                neighbors = adj_list[node]
-                for v in neighbors:
-                    val[node,v] = np.random.normal()
-    else:
-        val = tf.truncated_normal([hidden1_units, hidden2_units],
-                stddev=1.0 / math.sqrt(float(hidden1_units
-                    )))
+  hidden2 = conv_layer(hidden1, hidden1_units, hidden2_units, cnn_flag, adj_list, "hidden2")
+  # # Hidden 3
+  # hidden3 = conv_layer(hidden2, hidden2_units, hidden3_units, cnn_flag, adj_list, "hidden3")
+  # # Hidden 4
+  # hidden4 = conv_layer(hidden3, hidden3_units, hidden4_units, cnn_flag, adj_list, "hidden4")
 
-    weights = tf.Variable(val, name='weights', dtype=tf.float32)
-    biases = tf.Variable(tf.zeros([hidden2_units]), name='biases')
-    hidden2 = tf.nn.relu(tf.matmul(hidden1, weights) + biases)
+  # Linear soft-max
+  logits = fc_layer(hidden2, hidden2_units, NUM_CLASSES)
 
-  # Linear
-  with tf.name_scope('softmax_linear'):
-    weights = tf.Variable(
-        tf.truncated_normal([hidden2_units, NUM_CLASSES],
-                            stddev=1.0 / math.sqrt(float(hidden2_units))),
-        name='weights')
-    biases = tf.Variable(tf.zeros([NUM_CLASSES]),
-                         name='biases')
-    logits = tf.matmul(hidden2, weights) + biases
   return logits
 
 
@@ -116,10 +119,11 @@ def loss(logits, labels):
   Returns:
     loss: Loss tensor of type float.
   """
-  # labels = tf.to_int64(labels)
-  cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(
-      labels=labels, logits=logits, name='xentropy')
-  return tf.reduce_mean(cross_entropy, name='xentropy_mean')
+  with tf.name_scope("cross-entropy"):
+      cross_entropy = tf.reduce_mean(
+        tf.nn.softmax_cross_entropy_with_logits(labels=labels, logits=logits))
+      tf.summary.scalar('cross_entropy', cross_entropy)
+  return cross_entropy
 
 
 def training(loss, learning_rate):
@@ -134,15 +138,17 @@ def training(loss, learning_rate):
   Returns:
     train_op: The Op for training.
   """
-  # Add a scalar summary for the snapshot loss.
-  tf.summary.scalar('loss', loss)
-  # Create the gradient descent optimizer with the given learning rate.
-  optimizer = tf.train.GradientDescentOptimizer(learning_rate)
-  # Create a variable to track the global step.
-  global_step = tf.Variable(0, name='global_step', trainable=False)
-  # Use the optimizer to apply the gradients that minimize the loss
-  # (and also increment the global step counter) as a single training step.
-  train_op = optimizer.minimize(loss, global_step=global_step)
+  with tf.name_scope("train"):
+      # Create a variable to track the global step.
+      global_step = tf.Variable(0, name='global_step', trainable=False)
+
+      # Create the gradient descent optimizer with the given learning rate.
+      optimizer = tf.train.GradientDescentOptimizer(learning_rate)
+    #   optimizer = tf.train.AdamOptimizer(learning_rate)
+      # Use the optimizer to apply the gradients that minimize the loss
+      # (and also increment the global step counter) as a single training step.
+      train_op = optimizer.minimize(loss, global_step=global_step)
+      # Add a scalar summary for the snapshot loss.
   return train_op
 
 
@@ -150,16 +156,19 @@ def evaluation(logits, labels):
   """Evaluate the quality of the logits at predicting the label.
   Args:
     logits: Logits tensor, float - [batch_size, NUM_CLASSES].
-    labels: Labels tensor, int32 - [batch_size], with values in the
-      range [0, NUM_CLASSES).
+    labels: Labels tensor, int32 - [batch_size, NUM_CLASSES], with values based on
+            one-hot encoding
   Returns:
-    A scalar int32 tensor with the number of examples (out of batch_size)
-    that were predicted correctly.
+    A scalar on the accuracy.
   """
-  # For a classifier model, we can use the in_top_k Op.
-  # It returns a bool tensor with shape [batch_size] that is true for
-  # the examples where the label is in the top k (here k=1)
-  # of all logits for that example.
-  correct = tf.nn.in_top_k(logits, labels, 1)
-  # Return the number of true entries.
-  return tf.reduce_sum(tf.cast(correct, tf.int32))
+  with tf.name_scope("accuracy"):
+      # For a classifier model, we can use the in_top_k Op.
+      # It returns a bool tensor with shape [batch_size] that is true for
+      # the examples where the label is in the top k (here k=1)
+      # of all logits for that example.
+    #   correct = tf.nn.in_top_k(logits, labels, 1)
+      correct = tf.equal(tf.argmax(logits, 1), tf.argmax(labels, 1))
+      # Return the number of true entries
+      acc = tf.reduce_mean(tf.cast(correct, tf.float32))
+      tf.summary.scalar('accuracy', acc)
+  return acc

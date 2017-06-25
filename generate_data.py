@@ -76,7 +76,10 @@ def create_dataset(G, theta, trials, name, run = 1, regular_degree = None):
 
 		timestamps += [ts]
 		# labels += [[int(i == source) for i in range(num_nodes)]]
-		labels += [source]
+		# one-hot encoding
+		label = np.zeros(num_nodes)
+		label[source] = 1
+		labels += [label]
 
 	# save an array to a binary file in NumPy .npy format.
 	with open(filename,'wb') as f:

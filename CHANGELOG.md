@@ -10,8 +10,17 @@ Apr Wk 2
 
 Apr Wk 3
 ***********
-- TODO debug cnn `ResourceExhaustedError` by reducing number of nodes
+- debuged cnn `ResourceExhaustedError` by manually zeroing out weights outside
+    training step
 - graph name now a parameter to `fully_connected_feed.py`
 - compare accuracy using first spy estimate
-    - TODO modify plot function to read in features and return index of lowest.
 - `data/` folder now sub-categorized to different graph constructions
+
+May Wk 1
+***********
+- use one-hot encoding for labels (modified in input_data.py:read_data_sets)
+- adding up to 4 layers
+- supoprt with tensorboard `tensorboard --logdir LOGDIR`
+- initialize layers' bias to 0.1
+- fc activation set to relu
+- TODO accuracy calculated over batch size

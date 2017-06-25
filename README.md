@@ -65,6 +65,11 @@ Notable files
 					  		`tests/` subfolder
 		-- debug			(bool) set to `True` to use debug set
 
+3. To view data with tensorboard, here's an example call:
+    
+    ```
+    tensorboard --logdir LOGDIR
+    ```
 ---
 
 **[Contents](#contents)** |

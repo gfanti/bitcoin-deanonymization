@@ -1,0 +1,80 @@
+----------------------------------------
+Begin Torque Prologue (Thu Apr 13 16:56:05 2017)
+Job ID:           5868717.cc-mgmt1.campuscluster.illinois.edu
+Username:         limjiaj2
+Group:            csl
+Job Name:         test-cnn-nm
+Limits:           neednodes=1:ppn=12:golub,nodes=1:ppn=12:golub,walltime=20:00:00
+Job Queue:        csl
+Account:          csl
+Nodes:            golub003
+End Torque Prologue
+----------------------------------------
+W tensorflow/core/framework/op_kernel.cc:975] Resource exhausted: logs/cnn/runs1/model.ckpt-8999.data-00000-of-00001
+Traceback (most recent call last):
+  File "fully_connected_feed.py", line 378, in <module>
+    tf.app.run(main=main, argv=[sys.argv[0]] + unparsed)
+  File "/home/limjiaj2/.local/lib/python2.7/site-packages/tensorflow/python/platform/app.py", line 44, in run
+    _sys.exit(main(_sys.argv[:1] + flags_passthrough))
+  File "fully_connected_feed.py", line 280, in main
+    run_training()
+  File "fully_connected_feed.py", line 247, in run_training
+    saver.save(sess, checkpoint_file, global_step=step)
+  File "/home/limjiaj2/.local/lib/python2.7/site-packages/tensorflow/python/training/saver.py", line 1374, in save
+    {self.saver_def.filename_tensor_name: checkpoint_file})
+  File "/home/limjiaj2/.local/lib/python2.7/site-packages/tensorflow/python/client/session.py", line 767, in run
+    run_metadata_ptr)
+  File "/home/limjiaj2/.local/lib/python2.7/site-packages/tensorflow/python/client/session.py", line 965, in _run
+    feed_dict_string, options, run_metadata)
+  File "/home/limjiaj2/.local/lib/python2.7/site-packages/tensorflow/python/client/session.py", line 1015, in _do_run
+    target_list, options, run_metadata)
+  File "/home/limjiaj2/.local/lib/python2.7/site-packages/tensorflow/python/client/session.py", line 1035, in _do_call
+    raise type(e)(node_def, op, message)
+tensorflow.python.framework.errors_impl.ResourceExhaustedError: logs/cnn/runs1/model.ckpt-8999.data-00000-of-00001
+	 [[Node: save/SaveV2 = SaveV2[dtypes=[DT_INT32, DT_FLOAT, DT_FLOAT, DT_FLOAT, DT_FLOAT, DT_FLOAT, DT_FLOAT], _device="/job:localhost/replica:0/task:0/cpu:0"](_recv_save/Const_0, save/SaveV2/tensor_names, save/SaveV2/shape_and_slices, global_step, hidden1/biases, hidden1/weights, hidden2/biases, hidden2/weights, softmax_linear/biases, softmax_linear/weights)]]
+
+Caused by op u'save/SaveV2', defined at:
+  File "fully_connected_feed.py", line 378, in <module>
+    tf.app.run(main=main, argv=[sys.argv[0]] + unparsed)
+  File "/home/limjiaj2/.local/lib/python2.7/site-packages/tensorflow/python/platform/app.py", line 44, in run
+    _sys.exit(main(_sys.argv[:1] + flags_passthrough))
+  File "fully_connected_feed.py", line 280, in main
+    run_training()
+  File "fully_connected_feed.py", line 173, in run_training
+    saver = tf.train.Saver()
+  File "/home/limjiaj2/.local/lib/python2.7/site-packages/tensorflow/python/training/saver.py", line 1051, in __init__
+    self.build()
+  File "/home/limjiaj2/.local/lib/python2.7/site-packages/tensorflow/python/training/saver.py", line 1081, in build
+    restore_sequentially=self._restore_sequentially)
+  File "/home/limjiaj2/.local/lib/python2.7/site-packages/tensorflow/python/training/saver.py", line 673, in build
+    save_tensor = self._AddSaveOps(filename_tensor, saveables)
+  File "/home/limjiaj2/.local/lib/python2.7/site-packages/tensorflow/python/training/saver.py", line 271, in _AddSaveOps
+    save = self.save_op(filename_tensor, saveables)
+  File "/home/limjiaj2/.local/lib/python2.7/site-packages/tensorflow/python/training/saver.py", line 214, in save_op
+    tensors)
+  File "/home/limjiaj2/.local/lib/python2.7/site-packages/tensorflow/python/ops/gen_io_ops.py", line 552, in save_v2
+    tensors=tensors, name=name)
+  File "/home/limjiaj2/.local/lib/python2.7/site-packages/tensorflow/python/framework/op_def_library.py", line 763, in apply_op
+    op_def=op_def)
+  File "/home/limjiaj2/.local/lib/python2.7/site-packages/tensorflow/python/framework/ops.py", line 2392, in create_op
+    original_op=self._default_original_op, op_def=op_def)
+  File "/home/limjiaj2/.local/lib/python2.7/site-packages/tensorflow/python/framework/ops.py", line 1264, in __init__
+    self._traceback = _extract_stack()
+
+ResourceExhaustedError (see above for traceback): logs/cnn/runs1/model.ckpt-8999.data-00000-of-00001
+	 [[Node: save/SaveV2 = SaveV2[dtypes=[DT_INT32, DT_FLOAT, DT_FLOAT, DT_FLOAT, DT_FLOAT, DT_FLOAT, DT_FLOAT], _device="/job:localhost/replica:0/task:0/cpu:0"](_recv_save/Const_0, save/SaveV2/tensor_names, save/SaveV2/shape_and_slices, global_step, hidden1/biases, hidden1/weights, hidden2/biases, hidden2/weights, softmax_linear/biases, softmax_linear/weights)]]
+
+----------------------------------------
+Begin Torque Epilogue (Thu Apr 13 17:03:19 2017)
+Job ID:           5868717.cc-mgmt1.campuscluster.illinois.edu
+Username:         limjiaj2
+Group:            csl
+Job Name:         test-cnn-nm
+Session:          93150
+Limits:           neednodes=1:ppn=12:golub,nodes=1:ppn=12:golub,walltime=20:00:00
+Resources:        cput=00:06:39,energy_used=0,mem=1672860kb,vmem=6869852kb,walltime=00:07:03
+Job Queue:        csl
+Account:          csl
+Nodes:            golub003
+End Torque Epilogue
+----------------------------------------
