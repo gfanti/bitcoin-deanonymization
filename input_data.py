@@ -59,7 +59,7 @@ def dense_to_one_hot(labels_dense, num_classes):
   return labels_one_hot
 
 
-def extract_labels(f, one_hot=False, num_classes=10):
+def extract_labels(f, one_hot=False, num_classes=100):
   """Extract the labels into a 1D uint8 np array [index].
   Args:
     f: A file object that can be passed into a gzip reader.
@@ -241,8 +241,8 @@ def read_data_sets(train_dir,
 
 
   # Remove features that are not well-formed (ie not all timestamps are collected)
-  # train_features, train_labels = remove_incompletes(train_features, train_labels)
-  # test_features, test_labels = remove_incompletes(test_features, test_labels)
+  train_features, train_labels = remove_incompletes(train_features, train_labels)
+  test_features, test_labels = remove_incompletes(test_features, test_labels)
 
   # # We'll use the first 200k items to avoid using too much memory and train faster
   # train_features = train_features[:200000]

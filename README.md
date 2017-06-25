@@ -25,6 +25,7 @@ Notable files
 - `fully_connected_feed.py`
 - `utils.py`
 - `vis-tests.ipynb`
+- `test.sh`
 
 ## Usage
 1. To create a dataset, here's an example call:
@@ -65,6 +66,7 @@ Notable files
 					  		`tests/` subfolder
 		-- debug			(bool) set to `True` to use debug set
 
+A simple `test.sh` has been made to
 ---
 
 **[Contents](#contents)** |

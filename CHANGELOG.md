@@ -15,3 +15,10 @@ Apr Wk 3
 - compare accuracy using first spy estimate
     - TODO modify plot function to read in features and return index of lowest.
 - `data/` folder now sub-categorized to different graph constructions
+
+
+June WK 4
+***********
+- Refactored `network_setup.py` for conv and fully connected layer
+- Refactored `fully_connected_feed.py`
+- TODO is it necessary to encode features as one-hot? Ie, changing the size to [None, NUM_CLASSES]

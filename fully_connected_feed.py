@@ -37,28 +37,8 @@ from utils import *
 
 # Basic model parameters as external flags.
 FLAGS = None
-# RUNS = [1,2,3,4]
 RUNS = [1]
 LOG_DIR = 'logs'
-
-
-def placeholder_inputs(batch_size):
-  """Generate placeholder variables to represent the input tensors.
-  These placeholders are used as inputs by the rest of the model building
-  code and will be fed from the downloaded data in the .run() loop, below.
-  Args:
-    batch_size: The batch size will be baked into both placeholders.
-  Returns:
-    features_placeholder: Features placeholder.
-    labels_placeholder: Labels placeholder.
-  """
-  # Note that the shapes of the placeholders match the shapes of the full
-  # image and label tensors, except the first dimension is now batch_size
-  # rather than the full size of the train or test data sets.
-  features_placeholder = tf.placeholder(tf.float32, shape=(batch_size,
-                                                       network_setup.FEATURE_SIZE))
-  labels_placeholder = tf.placeholder(tf.int32, shape=batch_size)
-  return features_placeholder, labels_placeholder
 
 
 def fill_feed_dict(data_set, features_pl, labels_pl):
@@ -86,14 +66,14 @@ def fill_feed_dict(data_set, features_pl, labels_pl):
 
 
 def do_eval(sess,
-            eval_correct,
+            eval_op,
             features_placeholder,
             labels_placeholder,
             data_set):
   """Runs one evaluation against the full epoch of data.
   Args:
     sess: The session in which the model has been trained.
-    eval_correct: The Tensor that returns the number of correct predictions.
+    eval_op: The Tensor that returns the number of correct predictions.
     features_placeholder: The features placeholder.
     labels_placeholder: The labels placeholder.
     data_set: The set of features and labels to evaluate, from
@@ -107,7 +87,7 @@ def do_eval(sess,
     feed_dict = fill_feed_dict(data_set,
                                features_placeholder,
                                labels_placeholder)
-    true_count += sess.run(eval_correct, feed_dict=feed_dict)
+    true_count += sess.run(eval_op, feed_dict=feed_dict)
   precision = float(true_count) / num_examples
   print('  Num examples: %d  Num correct: %d  Precision @ 1: %0.04f' %
         (num_examples, true_count, precision))
@@ -123,13 +103,21 @@ def run_training():
 
   # Get the sets of images and labels for training, validation, and
   # test on network_setup.
-  n_data, data_sets = input_data.read_data_sets(os.path.join(FLAGS.input_data_dir,str(num_nodes)+'_nodes'), runs = RUNS)
+  train_dir = os.path.join(FLAGS.input_data_dir,str(num_nodes)+'_nodes')
+  n_data, data_sets = input_data.read_data_sets(train_dir, one_hot=False, runs = RUNS)
 
   # Tell TensorFlow that the model will be built into the default Graph.
   with tf.Graph().as_default():
     # Generate placeholders for the images and labels.
-    features_placeholder, labels_placeholder = placeholder_inputs(
-        FLAGS.batch_size)
+    # features_placeholder, labels_placeholder = placeholder_inputs(
+    #     FLAGS.batch_size)
+
+
+    features_placeholder = tf.placeholder(tf.float32,
+                            shape=[None, network_setup.FEATURE_SIZE])
+    # use one-hot?
+    labels_placeholder = tf.placeholder(tf.int32,
+                            shape=network_setup.NUM_CLASSES)
 
     cnn = (num_nodes == FLAGS.hidden1)
     adj_list = {}
@@ -160,13 +148,13 @@ def run_training():
                              adj_list)
 
     # Add to the Graph the Ops for loss calculation.
-    loss = network_setup.loss(logits, labels_placeholder)
+    loss_op = network_setup.loss(logits, labels_placeholder)
 
     # Add to the Graph the Ops that calculate and apply gradients.
-    train_op = network_setup.training(loss, FLAGS.learning_rate)
+    train_op = network_setup.training(loss_op, FLAGS.learning_rate)
 
     # Add the Op to compare the logits to the labels during evaluation.
-    eval_correct = network_setup.evaluation(logits, labels_placeholder)
+    eval_op = network_setup.evaluation(logits, labels_placeholder)
 
     # Build the summary Tensor based on the TF collection of Summaries.
     summary = tf.summary.merge_all()
@@ -235,15 +223,15 @@ def run_training():
         # inspect the values of your Ops or variables, you may include them
         # in the list passed to sess.run() and the value tensors will be
         # returned in the tuple from the call.
-        _, loss_value = sess.run([train_op, loss],
+        _, loss_value = sess.run([train_op, loss_op],
                                feed_dict=feed_dict)
 
         # CNN property: modfy weights to 0
         if (cnn):
             sess.run(update_weights_hid1)
-            weights1 = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope="hidden1")[0]
-            # print(weights1.eval(session=sess))
             sess.run(update_weights_hid2)
+            # weights1 = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope="hidden1")[0]
+            # print(weights1.eval(session=sess))
         duration = time.time() - start_time
 
         # Write the summaries and print an overview fairly often.
@@ -263,7 +251,7 @@ def run_training():
             # Evaluate against the training set.
             print('Training Data Eval:')
             precision = do_eval(sess,
-                    eval_correct,
+                    eval_op,
                     features_placeholder,
                     labels_placeholder,
                     data_sets.train)
@@ -272,7 +260,7 @@ def run_training():
             # Evaluate against the validation set.
             print('Validation Data Eval:')
             precision =do_eval(sess,
-                    eval_correct,
+                    eval_op,
                     features_placeholder,
                     labels_placeholder,
                     data_sets.validation)
@@ -280,7 +268,7 @@ def run_training():
             # Evaluate against the test set.
             print('Test Data Eval:')
             precision = do_eval(sess,
-                    eval_correct,
+                    eval_op,
                     features_placeholder,
                     labels_placeholder,
                     data_sets.test)
