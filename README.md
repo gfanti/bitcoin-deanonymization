@@ -66,7 +66,16 @@ Notable files
 					  		`tests/` subfolder
 		-- debug			(bool) set to `True` to use debug set
 
-A simple `test.sh` has been made to
+A simple `test.sh` has been made to run a 2-layer CNN.
+
+## Tensorboard integration
+
+1. Ensure that `logs/GRAPHNAME/` is empty
+2. Start an instance of `fully_connected_feed.py`
+3. run
+```
+tensorboard --logdir logs/GRAPHNAME/TESTNAME/
+```
 ---
 
 **[Contents](#contents)** |

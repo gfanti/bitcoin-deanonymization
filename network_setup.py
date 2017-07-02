@@ -57,7 +57,7 @@ def conv_layer(input, channels_in, channels_out, cnn_flag, adj_list, name):
 
       w = tf.Variable(val, dtype=tf.float32, name='weights')
       b = tf.Variable(tf.constant(0.1, shape=[channels_out]), name='biases')
-      act = tf.nn.relu(tf.matmul(input, w) + b)
+      act = tf.matmul(input, w) + b
 
       tf.summary.histogram("weights", w)
       tf.summary.histogram("biases", b)
@@ -72,7 +72,6 @@ def fc_layer(input, channels_in, channels_out, name="fc"):
                                 stddev=1.0 / math.sqrt(float(channels_in))),
             name='weights')
         b = tf.Variable(tf.zeros([channels_out]), name='biases')
-        # act = tf.matmul(input, w) + b
         act = tf.nn.relu(tf.matmul(input, w) + b)
 
         tf.summary.histogram("weights", w)
@@ -110,23 +109,24 @@ def inference(timestamps, hidden1_units, hidden2_units, adj_list):
   # hidden4 = conv_layer(hidden3, hidden3_units, hidden4_units, cnn_flag, adj_list, "hidden4")
 
   # Linear
-  logits = fc_layer(hidden2, hidden2_units, NUM_CLASSES)
+  logits = fc_layer(hidden2, hidden2_units, NUM_CLASSES, "fc")
 
   return logits
 
 
 def loss(logits, labels):
-  """Calculates the loss from the logits and the labels.
+  """Calculates the loss from the logits and the actual labels.
   Args:
     logits: Logits tensor, float - [batch_size, NUM_CLASSES].
-    labels: Labels tensor, int32 - [batch_size].
+    labels: Labels tensor, int32 - [batch_size, NUM_CLASSES].
   Returns:
     loss: Loss tensor of type float.
   """
-  labels = tf.to_int64(labels)
-  cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(
-      labels=labels, logits=logits, name='xentropy')
-  return tf.reduce_mean(cross_entropy, name='xentropy_mean')
+  with tf.name_scope("xentropy_mean"):
+      cross_entropy = tf.reduce_mean(
+        tf.nn.sparse_softmax_cross_entropy_with_logits(labels=labels, logits=logits))
+      tf.summary.scalar('cross_entropy', cross_entropy)
+  return cross_entropy
 
 
 def training(loss, learning_rate):
@@ -141,15 +141,17 @@ def training(loss, learning_rate):
   Returns:
     train_op: The Op for training.
   """
-  # Add a scalar summary for the snapshot loss.
-  tf.summary.scalar('loss', loss)
-  # Create the gradient descent optimizer with the given learning rate.
-  optimizer = tf.train.GradientDescentOptimizer(learning_rate)
-  # Create a variable to track the global step.
-  global_step = tf.Variable(0, name='global_step', trainable=False)
-  # Use the optimizer to apply the gradients that minimize the loss
-  # (and also increment the global step counter) as a single training step.
-  train_op = optimizer.minimize(loss, global_step=global_step)
+
+  with tf.name_scope("train"):
+      # Add a scalar summary for the snapshot loss.
+      tf.summary.scalar('loss', loss)
+      # Create the gradient descent optimizer with the given learning rate.
+      optimizer = tf.train.GradientDescentOptimizer(learning_rate)
+      # Create a variable to track the global step.
+      global_step = tf.Variable(0, name='global_step', trainable=False)
+      # Use the optimizer to apply the gradients that minimize the loss
+      # (and also increment the global step counter) as a single training step.
+      train_op = optimizer.minimize(loss, global_step=global_step)
   return train_op
 
 
@@ -167,7 +169,9 @@ def evaluation(logits, labels):
   # It returns a bool tensor with shape [batch_size] that is true for
   # the examples where the label is in the top k (here k=1)
   # of all logits for that example.
-
-  correct = tf.nn.in_top_k(logits, labels, 1)
+  with tf.name_scope("accuracy"):
+      correct = tf.nn.in_top_k(logits, labels, 1)
+      acc = tf.reduce_sum(tf.cast(correct, tf.int32))
+      tf.summary.scalar('accuracy', acc)
   # Return the number of true entries.
-  return tf.reduce_sum(tf.cast(correct, tf.int32))
+  return acc

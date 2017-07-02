@@ -64,7 +64,6 @@ def fill_feed_dict(data_set, features_pl, labels_pl):
   }
   return feed_dict
 
-
 def do_eval(sess,
             eval_op,
             features_placeholder,
@@ -114,10 +113,12 @@ def run_training():
 
 
     features_placeholder = tf.placeholder(tf.float32,
-                            shape=[None, network_setup.FEATURE_SIZE])
-    # use one-hot?
+                            shape=[None, network_setup.FEATURE_SIZE],
+                            name="x")
+
     labels_placeholder = tf.placeholder(tf.int32,
-                            shape=network_setup.NUM_CLASSES)
+                            shape=[None],
+                            name="labels")
 
     cnn = (num_nodes == FLAGS.hidden1)
     adj_list = {}
@@ -203,10 +204,11 @@ def run_training():
 
       print("Model restored from {}".format(LOG_DIR))
 
-    weights1 = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope="hidden1")[0]
-    update_weights_hid1 = tf.scatter_nd_update(weights1,indices, updates)
-    weights2 = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope="hidden2")[0]
-    update_weights_hid2 = tf.scatter_nd_update(weights2,indices, updates)
+    if (cnn):
+        weights1 = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope="hidden1")[0]
+        update_weights_hid1 = tf.scatter_nd_update(weights1,indices, updates)
+        weights2 = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope="hidden2")[0]
+        update_weights_hid2 = tf.scatter_nd_update(weights2,indices, updates)
 
     # Start the training loop.
     for step in xrange(last_step+1, FLAGS.max_steps):
@@ -230,9 +232,12 @@ def run_training():
         if (cnn):
             sess.run(update_weights_hid1)
             sess.run(update_weights_hid2)
-            # weights1 = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope="hidden1")[0]
-            # print(weights1.eval(session=sess))
+
         duration = time.time() - start_time
+
+        # DEBUG: to inspect weights
+        # weights1 = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope="hidden1")[0]
+        # print(weights1.eval(session=sess))
 
         # Write the summaries and print an overview fairly often.
         if step % 100 == 0:
@@ -256,6 +261,7 @@ def run_training():
                     labels_placeholder,
                     data_sets.train)
 
+            precision = sess.run(eval_op, feed_dict=feed_dict)
             log_file(num_datapoints, precision, testname=FLAGS.testname)
             # Evaluate against the validation set.
             print('Validation Data Eval:')

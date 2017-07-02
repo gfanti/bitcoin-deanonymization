@@ -2,3 +2,5 @@ data/run*
 data/.DS_Store
 data-gfanti-feb16/
 *.pyc
+*/.DS_Store
+.DS_Store
