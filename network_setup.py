@@ -30,7 +30,7 @@ import numpy as np
 
 import tensorflow as tf
 
-FEATURE_SIZE = 100
+FEATURE_SIZE = 300
 
 NUM_CLASSES = FEATURE_SIZE
 # NUM_CLASSES = 10

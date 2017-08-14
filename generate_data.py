@@ -60,9 +60,9 @@ def create_dataset(G, theta, trials, name, run = 1, regular_degree = None):
             nodes = G.nodes()
         else:
             nodes = [n for n in G.nodes() if G.degree(n) >= regular_degree]
-        # limit to two possibilites
-        candidates = [0,1,2,3,4,5,6,7,8,9]
 
+	# limit to all possibilites
+	candidates = [x for x in range(100)]
 	num_nodes = nx.number_of_nodes(G)
 	for trial in tqdm(range(trials)):
 

@@ -45,7 +45,7 @@ def parse_arguments():
 	parser = argparse.ArgumentParser()
 	parser.add_argument("-r", "--run", type=int,
 	                    help="changes the filename of saved data")
-	parser.add_argument("-f", "--filename", type=str, default = 'random_regular.gexf',
+	parser.add_argument("-f", "--filename", type=str, default = 'random_regular_300nodes.gexf',
 	                    help="graph to be loaded")
 	parser.add_argument("-v", "--verbose", help="increase output verbosity",
 	                    action="store_true")

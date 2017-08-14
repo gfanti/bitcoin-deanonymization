@@ -87,7 +87,10 @@ def do_eval(sess,
                                features_placeholder,
                                labels_placeholder)
     true_count += sess.run(eval_op, feed_dict=feed_dict)
-  precision = float(true_count) / num_examples
+  try:
+    precision = float(true_count) / num_examples
+  except ZeroDivisionError:
+    precision = 0
   print('  Num examples: %d  Num correct: %d  Precision @ 1: %0.04f' %
         (num_examples, true_count, precision))
   return precision
@@ -300,7 +303,7 @@ if __name__ == '__main__':
   parser.add_argument(
       '--graph_name',
       type=str,
-      default='random_regular.gexf',
+      default='random_regular_300nodes.gexf',
       help='file name in data/ folder'
   )
   parser.add_argument(

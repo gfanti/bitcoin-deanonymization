@@ -12,8 +12,8 @@ class DataGraph(nx.Graph):
 	def __init__(self, filename, spreading_time = None):
 		super(DataGraph, self).__init__(nx.read_gexf(filename))
 		self.lambda1 = 1 # spreading rate over the diffusion graph
-		
-		
+
+
 		# !! Read graph and label nodes from 0 to N-1
 		# !! why was it labelled so weirdly in the first place
 		mapping = {}
@@ -22,7 +22,7 @@ class DataGraph(nx.Graph):
 
 		nx.relabel_nodes(self, mapping, copy=False)
 
-		self.spreading_time = spreading_time	
+		self.spreading_time = spreading_time
 
 # Run diffusion over a provided gexf graph
 class DataGraphDiffusion(DataGraph):
@@ -30,14 +30,14 @@ class DataGraphDiffusion(DataGraph):
 	def __init__(self, filename, spreading_time = None):
 		''' NB: Here the spreading_time	is actually the number of rings of the graph to infect'''
 		super(DataGraphDiffusion, self).__init__(filename, spreading_time)
-		
 
-		
+
+
 	def spread_message(self, source = 0, first_spy_only = False, num_corrupt_cnx = 1):
 		'''first_spy_only denotes whether this diffusion spread will only be used
 		to measure the first spy adversary. In that case, some time-saving optimizations
 		can be implemented. Most of the time, this flag will be set to false.'''
-		
+
 		self.source = source
 		self.num_corrupt_cnx = num_corrupt_cnx
 
@@ -55,9 +55,9 @@ class DataGraphDiffusion(DataGraph):
 		self.infected = [source]
 
 		stopping_time = self.spreading_time
-		
+
 		self.infected_by_source = {}
-		
+
 		self.active = [(source, n) for n in self.neighbors(source)]	# number of active edges
 		count = 0
 		while self.active:
@@ -107,15 +107,15 @@ class DataGraphTrickle(DataGraph):
 
 	def __init__(self, filename, spreading_time = None):
 		''' NB: Here the spreading_time	is actually the number of rings of the graph to infect'''
-		super(DataGraphTrickle, self).__init__(filename, spreading_time)	
-		
+		super(DataGraphTrickle, self).__init__(filename, spreading_time)
 
-		
+
+
 	def spread_message(self, source = 0, first_spy_only = False, num_corrupt_cnx = 1):
 		'''first_spy_only denotes whether this diffusion spread will only be used
 		to measure the first spy adversary. In that case, some time-saving optimizations
 		can be implemented. Most of the time, this flag will be set to false.'''
-		
+
 		count = 0
 		self.source = source
 
@@ -131,7 +131,7 @@ class DataGraphTrickle(DataGraph):
 		self.infected = [source]
 
 		stopping_time = self.spreading_time
-		
+
 
 		while self.active and count < stopping_time:
 			count += 1
@@ -166,7 +166,7 @@ class DataGraphTrickle(DataGraph):
 						if rx_timestamp < stopping_time:
 							self.active.append(neighbor)
 				self.active.remove(node)
-				
+
 		# print 'infected nodes', self.infected, len(self.infected)
 		# print 'rx timetsamps', [(n,self.received_timestamps[n]) for n in self.infected]
 		# print 'timetsamps', [(n,self.adversary_timestamps[n]) for n in self.infected if n in self.adversary_timestamps]
